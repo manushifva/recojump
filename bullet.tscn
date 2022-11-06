@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://art_assets/tiles/Meteor.png" type="Texture" id=1]
+[ext_resource path="res://script/bullet.gd" type="Script" id=2]
+
+[sub_resource type="RectangleShape2D" id=20]
+extents = Vector2( 32.5, 31.5 )
+
+[node name="bullet" type="KinematicBody2D"]
+script = ExtResource( 2 )
+
+[node name="collision" type="CollisionShape2D" parent="."]
+position = Vector2( 32.5, 32.5 )
+shape = SubResource( 20 )
+
+[node name="area" type="Area2D" parent="."]
+
+[node name="collision" type="CollisionShape2D" parent="area"]
+position = Vector2( 32.5, 32.5 )
+shape = SubResource( 20 )
+
+[node name="sprite" type="Sprite" parent="area/collision"]
+position = Vector2( -0.5, -0.5 )
+rotation = 1.57079
+scale = Vector2( 0.242547, 0.242547 )
+texture = ExtResource( 1 )
+
+[connection signal="body_entered" from="area" to="." method="_on_area_body_entered"]

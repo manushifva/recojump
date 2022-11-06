@@ -1,0 +1,38 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://art_assets/tiles/trash.tres" type="SpriteFrames" id=1]
+[ext_resource path="res://art_assets/ui/panel.png" type="Texture" id=2]
+[ext_resource path="res://script/panel.gd" type="Script" id=3]
+[ext_resource path="res://art_assets/ui/ui.tres" type="Theme" id=4]
+
+[node name="panel" type="TextureButton"]
+margin_right = 40.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 64, 64 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme = ExtResource( 4 )
+script = ExtResource( 3 )
+
+[node name="texture" type="TextureRect" parent="."]
+margin_right = 60.0
+margin_bottom = 60.0
+texture = ExtResource( 2 )
+expand = true
+
+[node name="sprite" type="AnimatedSprite" parent="."]
+position = Vector2( 30, 32 )
+scale = Vector2( 0.141373, 0.141373 )
+frames = ExtResource( 1 )
+frame = 4
+
+[node name="label" type="Label" parent="."]
+margin_left = 4.0
+margin_right = 13.0
+margin_bottom = 22.0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "0"
+
+[connection signal="pressed" from="." to="." method="_on_panel_pressed"]
