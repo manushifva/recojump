@@ -1,17 +1,20 @@
 extends KinematicBody2D
 
 var bullet_instance = load('res://bullet.tscn')
+var player_shadow_instance = load('res://player_shadow.tscn')
 
 onready var game = get_node('/root/game')
 onready var name_label = get_node('name')
 onready var sprite = get_node('sprite')
 onready var camera = get_node('camera')
 onready var stun_timer = get_node('stun')
+onready var cooldown_timer = get_node('cooldown')
 onready var progress = get_node('progress')
 onready var tween = get_node('tween')
 onready var muzzle = get_node('muzzle')
 onready var attack_collision = get_node('area/collision')
 onready var sfx_player = get_node('sfx')
+onready var particle = get_node('particle')
 
 var colors = {'red': Color(1, 0.37, 0.38), 'blue': Color(0.37, 0.69, 1), 'green': Color(0.47, 1, 0.3), 'yellow': Color(1, 0.95, 0.19)}
 
@@ -23,6 +26,9 @@ var target = null
 var color = null
 var attack_radius = 1
 var max_inventory = 25
+var cooldown_duration = 0
+var current_cooldown = 0
+var allow_attack = true
 
 puppet var slave_pos = Vector2.ZERO
 puppet var slave_motion = Vector2.ZERO
@@ -34,6 +40,8 @@ puppet var slave_stunned = false
 puppet var slave_attack_radius = 1
 
 var motion = Vector2.ZERO
+var prev_motion = Vector2.ZERO
+var hit_the_ground = false
 var knockdir = Vector2.ZERO
 var knock_power = 0
 var max_knock = 0
@@ -42,15 +50,17 @@ var is_right = false
 var weapon = null
 var stunned = false
 var anti_stun_owned = false
+var base_scale
 
 var jump_max = 2
 var jump_count = 0
 
 func _ready():
-	pass
+	base_scale = sprite.scale
 	
 func play_sfx(sfx):
-	pass
+	sfx_player.stream = load('res://audio/sfx/' + sfx + '.mp3')
+	sfx_player.play()
 	
 func init(player_name, player_pos, player_color, is_been_slave):
 	name_label.text = player_name
@@ -94,28 +104,43 @@ func _physics_process(delta):
 				motion.y = -jump
 				jump_count += 1
 
+				var player_shadow = player_shadow_instance.instance()
+				game.add_child(player_shadow)
+				player_shadow.init(global_position, sprite.frame, sprite.flip_h, color)
+
 			if (Input.is_action_pressed('ui_right') or Input.is_action_pressed('ui_left')):
 				action = 'walk'
 				play_sfx('walk')
 			else:
 				action = 'idle'
+				sfx_player.playing = false
 				
-		if (Input.is_action_just_pressed('attack')):
-			if (target):
-				if (weapon == 'Tangan pencuri'):
-					target.rpc('stun', 1)
-					target.rpc('take_item', get_tree().get_network_unique_id())
-				elif (weapon == 'Tatapan Medusa'):
-					target.rpc('stun', 3, 'petrify')
-				elif (weapon == 'Tongkat meteor'):
-					var locked = target
-					for x in range(3):
-						yield(get_tree().create_timer(0.3), 'timeout')
-						
-						if (!game.testmode):
-							rpc('spawn_bullet', int(locked.name))
-						else:
-							spawn_bullet(self)
+			if (Input.is_action_just_pressed('attack')):
+				if (target and allow_attack and weapon):
+					cooldown_timer.start()
+					current_cooldown = cooldown_duration
+					game.attack_button.modulate = Color(0.45, 0.45, 0.45, 0.70)
+					game.cooldown_label.show()
+					game.cooldown_label.text = str(current_cooldown)
+					allow_attack = false
+					
+					if (weapon == 'Tangan pencuri'):
+						target.rpc('stun', 1)
+						target.rpc('take_item', get_tree().get_network_unique_id())
+						camera.shake(0.2, 5)
+					elif (weapon == 'Tatapan Medusa'):
+						target.rpc('stun', 3, 'petrify')
+						camera.shake(0.2, 5)
+					elif (weapon == 'Tongkat meteor'):
+						var locked = target
+						for x in range(3):
+							yield(get_tree().create_timer(0.3), 'timeout')
+							
+							if (!game.testmode):
+								rpc('spawn_bullet', int(locked.name))
+								camera.shake(0.2, 5)
+							else:
+								spawn_bullet(self)
 		
 		if (Input.is_action_just_pressed('inventory')):
 			game.toggle_inventory()
@@ -135,6 +160,43 @@ func _physics_process(delta):
 	
 	sprite.play(action)
 	
+	if (!is_on_floor()):
+		hit_the_ground = false
+		sprite.scale.y = range_lerp(abs(motion.y), 1, abs(jump), 0.85, 1.25)
+		sprite.scale.x = range_lerp(abs(motion.y), 1, abs(jump), 1.15, 0.85)
+
+	if (!hit_the_ground and is_on_floor()):
+		hit_the_ground = true
+		sprite.scale.x = range_lerp(abs(prev_motion.y), 1, abs(1700), 1.2, 1.3)
+		sprite.scale.y = range_lerp(abs(prev_motion.y), 1, abs(1700), 1, 0.9)
+		
+	if (sprite.scale.x < 0.85):
+		sprite.scale.x = 0.85
+		
+	if (sprite.scale.y > 1.2):
+		sprite.scale.y = 1.2
+	
+	sprite.scale.x = lerp(sprite.scale.x, 1, 1 - pow(0.01, delta))
+	sprite.scale.y = lerp(sprite.scale.y, 1, 1 - pow(0.01, delta))
+	
+	particle.emitting = false
+	if (action == 'walk'):
+		particle.emitting = true
+		
+		var direction
+		if (sprite.flip_h):
+			direction = 1
+		else:
+			direction = - 1
+		
+		particle.gravity.x = 100 * direction
+		particle.position.x = 32 * direction
+		
+	if (is_on_floor()):
+		particle.show()
+	else:
+		particle.hide()
+
 	if (knockdir != Vector2.ZERO):
 		if (max_knock == 0):
 			max_knock = knock_power + 1
@@ -151,6 +213,7 @@ func _physics_process(delta):
 			knock_power = 0
 			knockdir = Vector2.ZERO
 	else:
+		prev_motion = motion
 		motion = move_and_slide(motion, Vector2.UP)
 	
 	if (position.y > 2000):
@@ -161,11 +224,16 @@ func _physics_process(delta):
 	update()
 		
 sync func stun(duration, effect = null):
+	camera.shake(0.3, 7)
+	
 	progress.show()
 	stunned = true
 	
 	if (anti_stun_owned):
-		duration = duration * 0.5
+		if (duration > 1):
+			duration = duration * 0.5
+		else:
+			return
 	
 	var start_modulate = sprite.modulate
 	if (effect == 'petrify'):
@@ -212,6 +280,16 @@ sync func spawn_bullet(target):
 		bullet_target = self
 	
 	bullet.init(muzzle.global_position, self, bullet_target)
+	
+func _on_cooldown_timeout():
+	current_cooldown -= 1
+	if (current_cooldown > 0):
+		game.cooldown_label.text = str(current_cooldown)
+	else:
+		cooldown_timer.stop()
+		game.cooldown_label.hide()
+		game.attack_button.modulate = Color(1, 1, 1, 1)
+		allow_attack = true
 		
 func _draw():
 	if (weapon and !stunned):

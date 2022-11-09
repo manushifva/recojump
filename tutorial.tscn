@@ -1,0 +1,827 @@
+[gd_scene load_steps=36 format=2]
+
+[ext_resource path="res://art_assets/tiles/tilemap.tres" type="TileSet" id=1]
+[ext_resource path="res://art_assets/ui/font/Royal Kingdom.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://art_assets/ui/flat/kenneyUI-blue.tres" type="Theme" id=3]
+[ext_resource path="res://art_assets/backgrounds/sky.png" type="Texture" id=4]
+[ext_resource path="res://art_assets/ui/joystick-right.png" type="Texture" id=5]
+[ext_resource path="res://art_assets/ui/joystick-left.png" type="Texture" id=6]
+[ext_resource path="res://script/game.gd" type="Script" id=7]
+[ext_resource path="res://art_assets/ui/close.png" type="Texture" id=8]
+[ext_resource path="res://art_assets/ui/ui.tres" type="Theme" id=9]
+[ext_resource path="res://art_assets/tiles/castle.png" type="Texture" id=10]
+[ext_resource path="res://art_assets/ui/joystick-up.png" type="Texture" id=11]
+[ext_resource path="res://art_assets/backgrounds/island.png" type="Texture" id=12]
+[ext_resource path="res://art_assets/ui/background.png" type="Texture" id=13]
+[ext_resource path="res://art_assets/ui/timer-background.png" type="Texture" id=14]
+[ext_resource path="res://art_assets/backgrounds/mountains2.png" type="Texture" id=15]
+[ext_resource path="res://art_assets/ui/input.png" type="Texture" id=16]
+[ext_resource path="res://art_assets/ui/inventory.png" type="Texture" id=17]
+[ext_resource path="res://art_assets/ui/leaderboard.png" type="Texture" id=18]
+[ext_resource path="res://art_assets/players/Untitled89_20221028190448.png" type="Texture" id=19]
+[ext_resource path="res://art_assets/players/Untitled89_20221028190627.png" type="Texture" id=20]
+[ext_resource path="res://art_assets/backgrounds/cloud.png" type="Texture" id=21]
+[ext_resource path="res://art_assets/players/Untitled89_20221028190640.png" type="Texture" id=22]
+[ext_resource path="res://art_assets/players/Untitled89_20221028190452.png" type="Texture" id=23]
+[ext_resource path="res://art_assets/ui/attack.png" type="Texture" id=24]
+[ext_resource path="res://audio/sfx/walk.mp3" type="AudioStream" id=25]
+[ext_resource path="res://script/tutorial.gd" type="Script" id=26]
+
+[sub_resource type="Animation" id=23]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("transition/color:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="Animation" id=25]
+resource_name = "loading_transition"
+tracks/0/type = "value"
+tracks/0/path = NodePath("transition/color:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 1 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 1 ), Color( 1, 1, 1, 0 ) ]
+}
+
+[sub_resource type="Animation" id=24]
+resource_name = "screen_transition"
+length = 0.2
+tracks/0/type = "value"
+tracks/0/path = NodePath("transition/color:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.2 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 0,
+"values": [ Color( 1, 1, 1, 0 ), Color( 1, 1, 1, 1 ) ]
+}
+
+[sub_resource type="AtlasTexture" id=21]
+flags = 4
+atlas = ExtResource( 19 )
+region = Rect2( 0, 0, 300, 300 )
+
+[sub_resource type="SpriteFrames" id=22]
+animations = [ {
+"frames": [ ExtResource( 19 ) ],
+"loop": true,
+"name": "idle",
+"speed": 5.0
+}, {
+"frames": [ SubResource( 21 ), ExtResource( 23 ), ExtResource( 20 ), ExtResource( 22 ) ],
+"loop": true,
+"name": "walk",
+"speed": 12.0
+} ]
+
+[sub_resource type="DynamicFont" id=19]
+size = 40
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=17]
+size = 80
+use_filter = true
+font_data = ExtResource( 2 )
+
+[sub_resource type="CanvasItemMaterial" id=9]
+
+[sub_resource type="TileSet" id=8]
+0/name = "castle.png 0"
+0/texture = ExtResource( 10 )
+0/tex_offset = Vector2( 0, 0 )
+0/modulate = Color( 1, 1, 1, 1 )
+0/region = Rect2( 280, 0, 70, 70 )
+0/tile_mode = 0
+0/occluder_offset = Vector2( 0, 0 )
+0/navigation_offset = Vector2( 0, 0 )
+0/shape_offset = Vector2( 0, 0 )
+0/shape_transform = Transform2D( 1, 0, 0, 1, 0, 0 )
+0/shape_one_way = false
+0/shape_one_way_margin = 0.0
+0/shapes = [  ]
+0/z_index = 0
+
+[node name="game" type="Node2D"]
+script = ExtResource( 7 )
+testmode = true
+
+[node name="sfx" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 25 )
+
+[node name="spawn_timer" type="Timer" parent="."]
+wait_time = 5.0
+autostart = true
+
+[node name="level_timer" type="Timer" parent="."]
+
+[node name="countdown" type="Timer" parent="."]
+
+[node name="transition" type="CanvasLayer" parent="."]
+layer = 100
+visible = false
+
+[node name="animation" type="AnimationPlayer" parent="transition"]
+root_node = NodePath("../..")
+anims/RESET = SubResource( 23 )
+anims/loading_transition = SubResource( 25 )
+anims/screen_transition = SubResource( 24 )
+
+[node name="color" type="ColorRect" parent="transition"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0, 0, 0, 1 )
+
+[node name="loading" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="c" type="Control" parent="loading"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource( 9 )
+
+[node name="bg_color" type="ColorRect" parent="loading/c"]
+margin_right = 1080.0
+margin_bottom = 520.0
+color = Color( 1, 0.54902, 0.54902, 1 )
+
+[node name="v" type="VBoxContainer" parent="loading/c"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="separator" type="Control" parent="loading/c/v"]
+margin_right = 1080.0
+margin_bottom = 340.0
+size_flags_vertical = 3
+
+[node name="bg" type="MarginContainer" parent="loading/c/v"]
+margin_top = 344.0
+margin_right = 1080.0
+margin_bottom = 520.0
+size_flags_vertical = 0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 64
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="loading/c/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 144.0
+size_flags_vertical = 3
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="loading/c/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 144.0
+size_flags_horizontal = 5
+size_flags_vertical = 4
+custom_constants/margin_right = 16
+custom_constants/margin_top = 16
+custom_constants/margin_left = 16
+custom_constants/margin_bottom = 16
+
+[node name="v" type="VBoxContainer" parent="loading/c/v/bg/m"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 1000.0
+margin_bottom = 64.0
+
+[node name="label" type="Label" parent="loading/c/v/bg/m/v"]
+margin_right = 984.0
+margin_bottom = 22.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Tahukah kamu?"
+
+[node name="tips" type="Label" parent="loading/c/v/bg/m/v"]
+margin_top = 26.0
+margin_right = 984.0
+margin_bottom = 48.0
+size_flags_vertical = 1
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+autowrap = true
+
+[node name="m" type="MarginContainer" parent="loading/c"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="v" type="VBoxContainer" parent="loading/c/m"]
+margin_top = 217.0
+margin_right = 1080.0
+margin_bottom = 303.0
+size_flags_horizontal = 3
+size_flags_vertical = 4
+
+[node name="Control" type="Control" parent="loading/c/m/v"]
+margin_right = 120.0
+margin_bottom = 60.0
+rect_min_size = Vector2( 120, 60 )
+size_flags_horizontal = 0
+size_flags_vertical = 0
+
+[node name="label" type="Label" parent="loading/c/m/v"]
+margin_left = 465.0
+margin_top = 64.0
+margin_right = 615.0
+margin_bottom = 86.0
+rect_pivot_offset = Vector2( -518, -113 )
+size_flags_horizontal = 4
+text = "Memuat permainan ..."
+
+[node name="sprite" type="AnimatedSprite" parent="loading/c/m/v"]
+position = Vector2( 536, 12 )
+scale = Vector2( 0.375, 0.375 )
+frames = SubResource( 22 )
+animation = "walk"
+frame = 3
+playing = true
+
+[node name="timer" type="Timer" parent="loading"]
+wait_time = 3.0
+
+[node name="tutorial" type="CanvasLayer" parent="."]
+script = ExtResource( 26 )
+
+[node name="guide" type="TextureRect" parent="tutorial"]
+margin_left = 34.0
+margin_top = 319.0
+margin_right = 166.0
+margin_bottom = 451.0
+texture = ExtResource( 19 )
+expand = true
+stretch_mode = 5
+
+[node name="label" type="Label" parent="tutorial"]
+margin_left = 32.0
+margin_top = 370.0
+margin_right = 1048.0
+margin_bottom = 392.0
+theme = ExtResource( 9 )
+custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
+text = "(Klik/tap untuk lanjutkan)"
+align = 2
+
+[node name="v" type="VBoxContainer" parent="tutorial"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 9 )
+
+[node name="separator" type="Control" parent="tutorial/v"]
+margin_right = 1080.0
+margin_bottom = 341.0
+size_flags_vertical = 3
+
+[node name="bg" type="MarginContainer" parent="tutorial/v"]
+margin_top = 345.0
+margin_right = 1080.0
+margin_bottom = 520.0
+size_flags_vertical = 0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 64
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="tutorial/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 143.0
+size_flags_vertical = 3
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="tutorial/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 143.0
+rect_min_size = Vector2( 0, 79 )
+size_flags_horizontal = 5
+size_flags_vertical = 4
+custom_constants/margin_right = 16
+custom_constants/margin_top = 16
+custom_constants/margin_left = 16
+custom_constants/margin_bottom = 16
+
+[node name="v" type="VBoxContainer" parent="tutorial/v/bg/m"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 1000.0
+margin_bottom = 63.0
+
+[node name="tips" type="Label" parent="tutorial/v/bg/m/v"]
+margin_right = 984.0
+margin_bottom = 47.0
+size_flags_horizontal = 3
+size_flags_vertical = 7
+custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
+text = "Halo! Kamu pasti baru disini. Aku akan mengajarimu beberapa hal dasar! "
+autowrap = true
+
+[node name="ui" type="CanvasLayer" parent="."]
+layer = 10
+visible = false
+
+[node name="background" type="TextureRect" parent="ui"]
+margin_right = 1080.0
+margin_bottom = 64.0
+texture = ExtResource( 13 )
+expand = true
+
+[node name="timer_background" type="TextureRect" parent="ui"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -95.0
+margin_top = -17.0
+margin_right = 95.0
+margin_bottom = 77.0
+texture = ExtResource( 14 )
+expand = true
+
+[node name="timer" type="Label" parent="ui"]
+anchor_left = 0.5
+anchor_right = 0.5
+margin_left = -95.0
+margin_top = 13.0
+margin_right = 95.0
+margin_bottom = 62.0
+theme = ExtResource( 3 )
+custom_fonts/font = SubResource( 19 )
+text = "02:00"
+align = 1
+
+[node name="touchscreen" type="Node2D" parent="ui"]
+visible = false
+position = Vector2( 24, -104 )
+
+[node name="left" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 30, 499 )
+normal = ExtResource( 6 )
+action = "ui_left"
+
+[node name="right" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 136, 499 )
+normal = ExtResource( 5 )
+action = "ui_right"
+
+[node name="jump" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 912, 499 )
+normal = ExtResource( 11 )
+action = "ui_up"
+
+[node name="attack" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 805, 499 )
+normal = ExtResource( 24 )
+action = "attack"
+
+[node name="inventory" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 911, 126 )
+scale = Vector2( 0.345, 0.345 )
+normal = ExtResource( 17 )
+action = "inventory"
+
+[node name="leaderboard" type="TouchScreenButton" parent="ui/touchscreen"]
+position = Vector2( 804, 126 )
+scale = Vector2( 0.344538, 0.344538 )
+normal = ExtResource( 18 )
+action = "leaderboard"
+
+[node name="cooldown" type="Label" parent="ui/touchscreen"]
+visible = false
+margin_left = 806.0
+margin_top = 518.0
+margin_right = 845.0
+margin_bottom = 540.0
+rect_scale = Vector2( 2, 2 )
+theme = ExtResource( 9 )
+text = "11"
+align = 1
+
+[node name="disconnected" type="Control" parent="ui"]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 3 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="background" type="ColorRect" parent="ui/disconnected"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.298039, 0.298039, 0.298039, 1 )
+
+[node name="v" type="VBoxContainer" parent="ui/disconnected"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -287.0
+margin_top = -39.0
+margin_right = 287.0
+margin_bottom = 39.0
+
+[node name="label" type="Label" parent="ui/disconnected/v"]
+margin_right = 574.0
+margin_bottom = 78.0
+custom_fonts/font = SubResource( 17 )
+text = "Server terputus."
+
+[node name="reconnect" type="Button" parent="ui/disconnected/v"]
+margin_top = 82.0
+margin_right = 574.0
+margin_bottom = 128.251
+text = "Kembali ke lobby"
+
+[node name="container" type="MarginContainer" parent="ui"]
+margin_right = 445.0
+margin_bottom = 82.0
+theme = ExtResource( 9 )
+custom_constants/margin_right = 32
+custom_constants/margin_top = 8
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 64
+
+[node name="progress" type="ProgressBar" parent="ui/container"]
+margin_left = 32.0
+margin_top = 8.0
+margin_right = 413.0
+margin_bottom = 56.0945
+size_flags_horizontal = 7
+size_flags_vertical = 1
+max_value = 25.0
+step = 1.0
+percent_visible = false
+
+[node name="label" type="Label" parent="ui/container"]
+margin_left = 206.0
+margin_top = 21.0
+margin_right = 239.0
+margin_bottom = 43.0
+size_flags_horizontal = 4
+text = "0/25"
+
+[node name="inventory_ui" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="bg" type="MarginContainer" parent="inventory_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 32
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="inventory_ui/bg"]
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 1048.0
+margin_bottom = 488.0
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="inventory_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 9 )
+custom_constants/margin_right = 64
+custom_constants/margin_top = 64
+custom_constants/margin_left = 64
+custom_constants/margin_bottom = 64
+
+[node name="h" type="HBoxContainer" parent="inventory_ui/m"]
+margin_left = 64.0
+margin_top = 64.0
+margin_right = 1016.0
+margin_bottom = 456.0
+size_flags_horizontal = 3
+
+[node name="v" type="VBoxContainer" parent="inventory_ui/m/h"]
+margin_right = 464.0
+margin_bottom = 392.0
+size_flags_horizontal = 3
+
+[node name="h" type="HBoxContainer" parent="inventory_ui/m/h/v"]
+margin_right = 464.0
+margin_bottom = 42.0
+
+[node name="label" type="Label" parent="inventory_ui/m/h/v/h"]
+margin_top = 10.0
+margin_right = 46.0
+margin_bottom = 32.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Isi tas"
+
+[node name="separator" type="Control" parent="inventory_ui/m/h/v/h"]
+margin_left = 50.0
+margin_right = 138.0
+margin_bottom = 42.0
+size_flags_horizontal = 3
+
+[node name="empty" type="Button" parent="inventory_ui/m/h/v/h"]
+margin_left = 142.0
+margin_right = 277.486
+margin_bottom = 42.6484
+toggle_mode = true
+text = "Kosongkan"
+
+[node name="empty-all" type="Button" parent="inventory_ui/m/h/v/h"]
+margin_left = 281.0
+margin_right = 464.486
+margin_bottom = 42.6484
+text = "Kosongkan semua"
+
+[node name="separator" type="Control" parent="inventory_ui/m/h/v"]
+margin_top = 46.0
+margin_right = 464.0
+margin_bottom = 62.0
+rect_min_size = Vector2( 0, 16 )
+
+[node name="inventory" type="GridContainer" parent="inventory_ui/m/h/v"]
+margin_top = 66.0
+margin_right = 464.0
+margin_bottom = 214.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 6
+
+[node name="label2" type="Label" parent="inventory_ui/m/h/v"]
+margin_top = 218.0
+margin_right = 464.0
+margin_bottom = 240.0
+size_flags_vertical = 0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "item yang digunakan"
+
+[node name="item" type="GridContainer" parent="inventory_ui/m/h/v"]
+margin_top = 244.0
+margin_right = 464.0
+margin_bottom = 392.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+columns = 6
+
+[node name="separator" type="Control" parent="inventory_ui/m/h"]
+margin_left = 468.0
+margin_right = 484.0
+margin_bottom = 392.0
+rect_min_size = Vector2( 16, 0 )
+
+[node name="v2" type="VBoxContainer" parent="inventory_ui/m/h"]
+margin_left = 488.0
+margin_right = 952.0
+margin_bottom = 392.0
+size_flags_horizontal = 3
+
+[node name="label" type="Label" parent="inventory_ui/m/h/v2"]
+margin_right = 464.0
+margin_bottom = 22.0
+size_flags_vertical = 0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "crafting menu"
+
+[node name="c" type="ScrollContainer" parent="inventory_ui/m/h/v2"]
+margin_top = 26.0
+margin_right = 464.0
+margin_bottom = 392.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="craftable" type="VBoxContainer" parent="inventory_ui/m/h/v2/c"]
+margin_right = 464.0
+margin_bottom = 366.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="close" type="TouchScreenButton" parent="inventory_ui/m"]
+position = Vector2( 999, 0 )
+normal = ExtResource( 8 )
+action = "inventory"
+
+[node name="leaderboard_ui" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="bg" type="MarginContainer" parent="leaderboard_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 32
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="leaderboard_ui/bg"]
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 1048.0
+margin_bottom = 488.0
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="leaderboard_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource( 9 )
+custom_constants/margin_right = 64
+custom_constants/margin_top = 64
+custom_constants/margin_left = 64
+custom_constants/margin_bottom = 64
+
+[node name="close" type="TouchScreenButton" parent="leaderboard_ui/m"]
+position = Vector2( 999, 0 )
+normal = ExtResource( 8 )
+action = "leaderboard"
+
+[node name="v" type="VBoxContainer" parent="leaderboard_ui/m"]
+margin_left = 64.0
+margin_top = 64.0
+margin_right = 1016.0
+margin_bottom = 456.0
+
+[node name="label" type="Label" parent="leaderboard_ui/m/v"]
+margin_right = 952.0
+margin_bottom = 22.0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "Leaderboard"
+
+[node name="game_end_ui" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="bg" type="MarginContainer" parent="game_end_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 32
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="game_end_ui/bg"]
+margin_left = 32.0
+margin_top = 32.0
+margin_right = 1048.0
+margin_bottom = 488.0
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="game_end_ui"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource( 9 )
+custom_constants/margin_right = 64
+custom_constants/margin_top = 64
+custom_constants/margin_left = 64
+custom_constants/margin_bottom = 64
+
+[node name="v" type="VBoxContainer" parent="game_end_ui/m"]
+margin_left = 64.0
+margin_top = 64.0
+margin_right = 1016.0
+margin_bottom = 456.0
+
+[node name="label" type="Label" parent="game_end_ui/m/v"]
+margin_right = 952.0
+margin_bottom = 22.0
+size_flags_vertical = 0
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+text = "game selesai!"
+
+[node name="winner" type="Label" parent="game_end_ui/m/v"]
+margin_top = 26.0
+margin_right = 952.0
+margin_bottom = 48.0
+theme = ExtResource( 3 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="back_to_lobby" type="Button" parent="game_end_ui/m/v"]
+margin_top = 52.0
+margin_right = 175.486
+margin_bottom = 94.6484
+size_flags_horizontal = 0
+size_flags_vertical = 0
+text = "Kembali ke lobby"
+
+[node name="parallax" type="ParallaxBackground" parent="."]
+layer = -1
+
+[node name="mountains" type="ParallaxLayer" parent="parallax"]
+modulate = Color( 1, 1, 1, 0.572549 )
+position = Vector2( 0, 96 )
+motion_scale = Vector2( 0, 1 )
+motion_mirroring = Vector2( 1332, 0 )
+
+[node name="sprite" type="Sprite" parent="parallax/mountains"]
+modulate = Color( 0.392157, 0.427451, 1, 0.698039 )
+position = Vector2( 50, -106 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 15 )
+centered = false
+flip_h = true
+
+[node name="mountains2" type="ParallaxLayer" parent="parallax"]
+position = Vector2( 0, 96 )
+motion_scale = Vector2( 0.01, 1 )
+motion_mirroring = Vector2( 1332, 0 )
+
+[node name="sprite" type="Sprite" parent="parallax/mountains2"]
+modulate = Color( 0.360784, 0.803922, 1, 0.501961 )
+position = Vector2( 133, 87 )
+scale = Vector2( 2, 2 )
+texture = ExtResource( 15 )
+centered = false
+
+[node name="cloud" type="ParallaxLayer" parent="parallax"]
+motion_scale = Vector2( 0.1, 0 )
+
+[node name="sprite" type="Sprite" parent="parallax/cloud"]
+position = Vector2( 698.386, -1164 )
+scale = Vector2( 0.624041, 0.624041 )
+texture = ExtResource( 21 )
+
+[node name="background_object" type="Node2D" parent="."]
+z_index = -3
+z_as_relative = false
+
+[node name="island" type="Sprite" parent="background_object"]
+position = Vector2( 1389, -786 )
+texture = ExtResource( 12 )
+
+[node name="background" type="CanvasLayer" parent="."]
+layer = -5
+
+[node name="sprite" type="Sprite" parent="background"]
+position = Vector2( 2, -208 )
+z_index = -2
+z_as_relative = false
+texture = ExtResource( 4 )
+centered = false
+
+[node name="tiles" type="TileMap" parent="."]
+tile_set = ExtResource( 1 )
+cell_size = Vector2( 70, 70 )
+format = 1
+tile_data = PoolIntArray( -1114137, 50, 0, -1114136, 50, 0, -1114135, 50, 0, -1114134, 50, 0, -1114133, 50, 0, -1114132, 50, 0, -1114131, 50, 0, -1114130, 50, 0, -1114129, 50, 0, -1114128, 50, 0, -1114127, 50, 0, -1114126, 50, 0, -1114125, 50, 0, -1114124, 50, 0, -1114123, 50, 0, -1114122, 50, 0, -1114121, 50, 0, -1114120, 50, 0, -1114119, 50, 0, -1114118, 50, 0, -1114117, 50, 0, -1114116, 50, 0, -1114115, 50, 0, -1114114, 50, 0, -1114113, 50, 0, -1179648, 50, 0, -1179647, 50, 0, -1179646, 50, 0, -1179645, 50, 0, -1179644, 50, 0, -1179643, 50, 0, -1179642, 50, 0, -1179641, 50, 0, -1179640, 50, 0, -1179639, 50, 0, -1179638, 50, 0, -1179637, 50, 0, -1179636, 50, 0, -1179635, 50, 0, -1179634, 50, 0, -1179633, 50, 0, -1179632, 50, 0, -1179631, 50, 0, -1179630, 50, 0, -1179629, 50, 0, -1179628, 50, 0, -1179627, 50, 0, -1179626, 50, 0, -1179625, 50, 0, -1179624, 50, 0, -1179623, 50, 0, -1048601, 50, 0, -1114087, 50, 0, -983065, 50, 0, -1048551, 50, 0, -917529, 50, 0, -983015, 50, 0, -851993, 50, 0, -917479, 50, 0, -786457, 50, 0, -851943, 50, 0, -720921, 50, 0, -786407, 50, 0, -655385, 50, 0, -720871, 50, 0, -589849, 50, 0, -655335, 50, 0, -524313, 50, 0, -589799, 50, 0, -458777, 50, 0, -524263, 50, 0, -393241, 50, 0, -458727, 50, 0, -327705, 50, 0, -393191, 50, 0, -262169, 50, 0, -327655, 50, 0, -196633, 50, 0, -262119, 50, 0, -131097, 50, 0, -196583, 50, 0, -65561, 50, 0, -131047, 50, 0, -25, 50, 0, -65533, 23, 0, -65532, 23, 0, -65531, 23, 0, -65530, 23, 0, -65511, 50, 0, 65511, 50, 0, 3, 51, 0, 4, 50, 0, 5, 50, 0, 6, 49, 0, 25, 50, 0, 131047, 50, 0, 65540, 51, 0, 65541, 48, 0, 65546, 23, 0, 65561, 50, 0, 196583, 50, 0, 131097, 50, 0, 262119, 50, 0, 196626, 32, 0, 196627, 32, 0, 196628, 32, 0, 196629, 32, 0, 196633, 50, 0, 327655, 50, 0, 262162, 50, 0, 262163, 50, 0, 262164, 50, 0, 262165, 50, 0, 262169, 50, 0, 393191, 50, 0, 327698, 50, 0, 327699, 50, 0, 327700, 50, 0, 327701, 50, 0, 327705, 50, 0, 458727, 50, 0, 458733, 20, 0, 458738, 43, 0, 458739, 44, 0, 458740, 43, 0, 458747, 37, 0, 458749, 44, 0, 393219, 44, 0, 393221, 38, 0, 393222, 43, 0, 393223, 42, 0, 393224, 44, 0, 393226, 36, 0, 393234, 50, 0, 393235, 50, 0, 393236, 50, 0, 393237, 50, 0, 393240, 40, 0, 393241, 50, 0, 524263, 50, 0, 524264, 23, 0, 524265, 23, 0, 524266, 23, 0, 524267, 23, 0, 524268, 23, 0, 524269, 23, 0, 524270, 23, 0, 524271, 23, 0, 524272, 23, 0, 524273, 23, 0, 524274, 23, 0, 524275, 23, 0, 524276, 23, 0, 524277, 23, 0, 524278, 23, 0, 524279, 23, 0, 524280, 23, 0, 524281, 23, 0, 524282, 32, 0, 524283, 23, 0, 524284, 23, 0, 524285, 23, 0, 524286, 23, 0, 524287, 23, 0, 458752, 23, 0, 458753, 23, 0, 458754, 23, 0, 458755, 23, 0, 458756, 23, 0, 458757, 23, 0, 458758, 23, 0, 458759, 23, 0, 458760, 23, 0, 458761, 23, 0, 458762, 23, 0, 458763, 23, 0, 458764, 32, 0, 458765, 32, 0, 458766, 32, 0, 458767, 32, 0, 458768, 32, 0, 458769, 32, 0, 458770, 50, 0, 458771, 50, 0, 458772, 50, 0, 458773, 50, 0, 458774, 23, 0, 458775, 23, 0, 458776, 23, 0, 458777, 23, 0, 589799, 50, 0, 589800, 50, 0, 589801, 50, 0, 589802, 50, 0, 589803, 50, 0, 589804, 50, 0, 589805, 27, 0, 589806, 50, 0, 589807, 50, 0, 589808, 50, 0, 589809, 50, 0, 589810, 50, 0, 589811, 50, 0, 589812, 50, 0, 589813, 50, 0, 589814, 50, 0, 589815, 50, 0, 589816, 50, 0, 589817, 50, 0, 589818, 50, 0, 589819, 50, 0, 589820, 50, 0, 589821, 50, 0, 589822, 50, 0, 589823, 50, 0, 524288, 27, 0, 524289, 50, 0, 524290, 50, 0, 524291, 50, 0, 524292, 50, 0, 524293, 50, 0, 524294, 50, 0, 524295, 50, 0, 524296, 50, 0, 524297, 50, 0, 524298, 50, 0, 524299, 50, 0, 524300, 50, 0, 524301, 50, 0, 524302, 50, 0, 524303, 50, 0, 524304, 50, 0, 524305, 50, 0, 524306, 50, 0, 524307, 50, 0, 524308, 50, 0, 524309, 50, 0, 524310, 50, 0, 524311, 50, 0, 524312, 50, 0, 524313, 50, 0, 655335, 50, 0, 655336, 50, 0, 655337, 50, 0, 655338, 50, 0, 655339, 50, 0, 655340, 50, 0, 655341, 50, 0, 655342, 50, 0, 655343, 50, 0, 655344, 50, 0, 655345, 30, 0, 655346, 50, 0, 655347, 50, 0, 655348, 50, 0, 655349, 50, 0, 655350, 50, 0, 655351, 50, 0, 655352, 30, 0, 655353, 50, 0, 655354, 50, 0, 655355, 50, 0, 655356, 50, 0, 655357, 50, 0, 655358, 50, 0, 655359, 50, 0, 589824, 50, 0, 589825, 50, 0, 589826, 50, 0, 589827, 50, 0, 589828, 50, 0, 589829, 50, 0, 589830, 50, 0, 589831, 50, 0, 589832, 50, 0, 589833, 50, 0, 589834, 50, 0, 589835, 50, 0, 589836, 50, 0, 589837, 50, 0, 589838, 50, 0, 589839, 50, 0, 589840, 30, 0, 589841, 50, 0, 589842, 50, 0, 589843, 50, 0, 589844, 50, 0, 589845, 50, 0, 589846, 50, 0, 589847, 31, 0, 589848, 50, 0, 589849, 50, 0, 720871, 50, 0, 720872, 50, 0, 720873, 50, 0, 720874, 50, 0, 720875, 50, 0, 720876, 50, 0, 720877, 50, 0, 720878, 50, 0, 720879, 50, 0, 720880, 50, 0, 720881, 50, 0, 720882, 50, 0, 720883, 50, 0, 720884, 31, 0, 720885, 50, 0, 720886, 50, 0, 720887, 50, 0, 720888, 50, 0, 720889, 50, 0, 720890, 50, 0, 720891, 50, 0, 720892, 50, 0, 720893, 50, 0, 720894, 50, 0, 720895, 50, 0, 655360, 50, 0, 655361, 50, 0, 655362, 50, 0, 655363, 50, 0, 655364, 50, 0, 655365, 50, 0, 655366, 50, 0, 655367, 27, 0, 655368, 50, 0, 655369, 50, 0, 655370, 50, 0, 655371, 50, 0, 655372, 50, 0, 655373, 50, 0, 655374, 50, 0, 655375, 50, 0, 655376, 50, 0, 655377, 50, 0, 655378, 50, 0, 655379, 50, 0, 655380, 50, 0, 655381, 50, 0, 655382, 50, 0, 655383, 50, 0, 655384, 50, 0, 655385, 50, 0, 786407, 50, 0, 786408, 30, 0, 786409, 50, 0, 786410, 50, 0, 786411, 50, 0, 786412, 50, 0, 786413, 50, 0, 786414, 50, 0, 786415, 50, 0, 786416, 50, 0, 786417, 50, 0, 786418, 50, 0, 786419, 50, 0, 786420, 50, 0, 786421, 50, 0, 786422, 50, 0, 786423, 50, 0, 786424, 50, 0, 786425, 50, 0, 786426, 50, 0, 786427, 50, 0, 786428, 50, 0, 786429, 50, 0, 786430, 50, 0, 786431, 50, 0, 720896, 50, 0, 720897, 50, 0, 720898, 50, 0, 720899, 50, 0, 720900, 50, 0, 720901, 50, 0, 720902, 50, 0, 720903, 50, 0, 720904, 50, 0, 720905, 50, 0, 720906, 50, 0, 720907, 50, 0, 720908, 50, 0, 720909, 50, 0, 720910, 50, 0, 720911, 50, 0, 720912, 50, 0, 720913, 50, 0, 720914, 50, 0, 720915, 50, 0, 720916, 50, 0, 720917, 50, 0, 720918, 50, 0, 720919, 50, 0, 720920, 50, 0, 720921, 50, 0 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[node name="spawners" type="TileMap" parent="."]
+modulate = Color( 1, 0.00784314, 0.00784314, 1 )
+material = SubResource( 9 )
+tile_set = SubResource( 8 )
+cell_size = Vector2( 70, 70 )
+format = 1
+tile_data = PoolIntArray( 458751, 0, 0, 393217, 0, 0, 393219, 0, 0, 393221, 0, 0, 393223, 0, 0, 393225, 0, 0 )
+__meta__ = {
+"_edit_lock_": true
+}
+
+[connection signal="timeout" from="spawn_timer" to="." method="_on_spawn_timer_timeout"]
+[connection signal="timeout" from="level_timer" to="." method="_on_level_timer_timeout"]
+[connection signal="pressed" from="ui/disconnected/v/reconnect" to="." method="_on_reconnect_pressed"]
+[connection signal="pressed" from="inventory_ui/m/h/v/h/empty" to="." method="_on_empty_pressed"]
+[connection signal="pressed" from="inventory_ui/m/h/v/h/empty-all" to="." method="_on_emptyall_pressed"]
+[connection signal="pressed" from="game_end_ui/m/v/back_to_lobby" to="." method="_on_back_to_lobby_pressed"]

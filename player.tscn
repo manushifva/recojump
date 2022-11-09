@@ -1,29 +1,48 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=16 format=2]
 
-[ext_resource path="res://art_assets/players/Untitled89_20221028190640.png" type="Texture" id=1]
+[ext_resource path="res://art_assets/players/player.png" type="Texture" id=1]
 [ext_resource path="res://script/player.gd" type="Script" id=2]
-[ext_resource path="res://art_assets/players/Untitled89_20221028190448.png" type="Texture" id=3]
+[ext_resource path="res://art_assets/players/dust.png" type="Texture" id=3]
 [ext_resource path="res://art_assets/ui/flat/kenneyUI-blue.tres" type="Theme" id=4]
-[ext_resource path="res://art_assets/players/Untitled89_20221028190627.png" type="Texture" id=5]
-[ext_resource path="res://art_assets/players/Untitled89_20221028190452.png" type="Texture" id=6]
 [ext_resource path="res://audio/sfx/walk.mp3" type="AudioStream" id=7]
+[ext_resource path="res://script/camera.gd" type="Script" id=8]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 41.5, 41.5 )
+extents = Vector2( 34.5, 39.5 )
 
-[sub_resource type="AtlasTexture" id=21]
+[sub_resource type="AtlasTexture" id=33]
 flags = 4
-atlas = ExtResource( 3 )
-region = Rect2( 0, 0, 300, 300 )
+atlas = ExtResource( 1 )
+region = Rect2( 315, 0, 105, 105 )
+
+[sub_resource type="AtlasTexture" id=29]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 0, 0, 105, 105 )
+
+[sub_resource type="AtlasTexture" id=30]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 210, 0, 105, 105 )
+
+[sub_resource type="AtlasTexture" id=31]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 420, 0, 105, 105 )
+
+[sub_resource type="AtlasTexture" id=32]
+flags = 4
+atlas = ExtResource( 1 )
+region = Rect2( 525, 0, 105, 105 )
 
 [sub_resource type="SpriteFrames" id=23]
 animations = [ {
-"frames": [ ExtResource( 3 ) ],
+"frames": [ SubResource( 33 ) ],
 "loop": true,
 "name": "idle",
 "speed": 5.0
 }, {
-"frames": [ SubResource( 21 ), ExtResource( 6 ), ExtResource( 5 ), ExtResource( 1 ) ],
+"frames": [ SubResource( 29 ), SubResource( 30 ), SubResource( 31 ), SubResource( 32 ) ],
 "loop": true,
 "name": "walk",
 "speed": 12.0
@@ -33,20 +52,47 @@ animations = [ {
 radius = 500.0
 
 [sub_resource type="RectangleShape2D" id=22]
-extents = Vector2( 54.5, 47 )
+extents = Vector2( 47.5, 39.5 )
 
 [node name="player" type="KinematicBody2D"]
 z_index = 10
 script = ExtResource( 2 )
 
+[node name="particle" type="CPUParticles2D" parent="."]
+modulate = Color( 0.913725, 0.913725, 0.913725, 1 )
+position = Vector2( -32, 32 )
+amount = 12
+lifetime = 0.7
+explosiveness = 0.3
+randomness = 1.0
+lifetime_randomness = 0.5
+texture = ExtResource( 3 )
+emission_shape = 1
+emission_sphere_radius = 1.0
+direction = Vector2( 10, 0 )
+spread = 0.0
+gravity = Vector2( -100, -30 )
+initial_velocity = 0.5
+initial_velocity_random = 1.0
+angle = 83.8
+scale_amount = 0.3
+scale_amount_random = 1.0
+
 [node name="sfx" type="AudioStreamPlayer" parent="."]
 stream = ExtResource( 7 )
+
+[node name="cooldown" type="Timer" parent="."]
 
 [node name="stun" type="Timer" parent="."]
 
 [node name="camera" type="Camera2D" parent="."]
 zoom = Vector2( 1.5, 1.5 )
 smoothing_enabled = true
+script = ExtResource( 8 )
+
+[node name="tween" type="Tween" parent="camera"]
+
+[node name="timer" type="Timer" parent="camera"]
 
 [node name="name" type="Label" parent="."]
 margin_left = -54.0
@@ -60,15 +106,14 @@ text = "Player 1"
 align = 1
 
 [node name="collision" type="CollisionShape2D" parent="."]
-visible = false
 position = Vector2( -1.5, 3.5 )
 shape = SubResource( 1 )
 
 [node name="sprite" type="AnimatedSprite" parent="."]
 position = Vector2( 1.90735e-06, 1 )
-scale = Vector2( 0.375, 0.375 )
 frames = SubResource( 23 )
 animation = "walk"
+frame = 2
 
 [node name="area" type="Area2D" parent="."]
 
@@ -79,7 +124,7 @@ shape = SubResource( 20 )
 [node name="hitbox" type="Area2D" parent="."]
 
 [node name="collision" type="CollisionShape2D" parent="hitbox"]
-position = Vector2( 0.5, -1 )
+position = Vector2( -2.5, 3.5 )
 shape = SubResource( 22 )
 
 [node name="progress" type="ProgressBar" parent="."]
@@ -95,6 +140,8 @@ percent_visible = false
 [node name="muzzle" type="Position2D" parent="."]
 position = Vector2( 0, -304 )
 
+[connection signal="timeout" from="cooldown" to="." method="_on_cooldown_timeout"]
+[connection signal="timeout" from="camera/timer" to="camera" method="_on_timer_timeout"]
 [connection signal="body_entered" from="area" to="." method="_on_area_body_entered"]
 [connection signal="body_exited" from="area" to="." method="_on_area_body_exited"]
 [connection signal="body_entered" from="hitbox" to="." method="_on_hitbox_body_entered"]

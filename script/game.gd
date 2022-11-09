@@ -3,8 +3,9 @@ extends Node2D
 var trash_instance = load('res://trash.tscn')
 var panel_instance = load('res://panel.tscn')
 var craftable_instance = load('res://craftable.tscn')
+var leaderboard_instance = load('res://leaderboard.tscn')
 
-var testmode = ProjectSettings.get_setting('application/config/testmode')
+export var testmode = false
 
 # main game elements
 
@@ -29,6 +30,8 @@ onready var loading = get_node('loading')
 onready var transition = get_node('transition')
 onready var transition_color = get_node('transition/color')
 onready var animation = get_node('transition/animation')
+onready var cooldown_label = get_node('ui/touchscreen/cooldown')
+onready var attack_button = get_node('ui/touchscreen/attack')
 
 # inventory ui
 
@@ -43,11 +46,12 @@ onready var inventory_container = get_node('ui/container')
 # leaderboard ui
 
 onready var leaderboard_ui = get_node('leaderboard_ui')
+onready var leaderboard_slots = get_node('leaderboard_ui/m/v/')
 
 # game end ui
 
 onready var game_end_ui = get_node('game_end_ui')
-onready var score = get_node('leaderboard_ui/m/score')
+# onready var score = get_node('leaderboard_ui/m/score')
 onready var winner = get_node('game_end_ui/m/v/winner')
 
 var camera_limit_left
@@ -63,6 +67,7 @@ var inventory = []
 var items = []
 
 var trash_list = data.trash.keys()
+var items_list = data.items.keys()
 
 var click_to_sell = false
 
@@ -108,14 +113,14 @@ func _ready():
 		var new_player = load('res://player.tscn').instance()
 		add_child(new_player)
 		
-		new_player.init('test_player', Vector2(0, 0), 'red', false)
+		new_player.init('test_player', Vector2(-1576, 248), 'red', false)
 		
 		render_inventory()
 		update_inventory_progress()
 		update_items(1, items)
-	
-	if (OS.get_name() == 'Android' or OS.get_name() == 'iOS'):
-		touchscreen.show()
+		
+		get_node('ui/timer_background').hide()
+		timer.hide()
 	
 	spawners.hide()
 	
@@ -162,8 +167,11 @@ func _ready():
 	transition.hide()
 	
 	ui.show()
+	if (OS.get_name() == 'Android' or OS.get_name() == 'iOS'):
+		touchscreen.show()
 	
-	level_timer.start()
+	if (!testmode):
+		level_timer.start()
 
 func _on_level_timer_timeout():
 	game_time -= 1
@@ -238,15 +246,21 @@ func render_inventory():
 		if (count > 0):
 			var panel = panel_instance.instance()
 			inventory_slots.add_child(panel)
-			panel.init(trash_list.find(trash), count)
+			panel.init(trash_list.find(trash), count, 'trash')
+			
+	for item in items_list:
+		if (item in inventory):
+			var panel = panel_instance.instance()
+			inventory_slots.add_child(panel)
+			panel.init(items_list.find(item), 0, 'item')
 			
 	for child in item_slots.get_children():
 		child.queue_free()
 
 	for item in items:
-		var label = Label.new()
-		label.text = item
-		item_slots.add_child(label)
+		var panel = panel_instance.instance()
+		item_slots.add_child(panel)
+		panel.init(items_list.find(item), 0, 'item')
 	
 func update_inventory_progress():
 	var player
@@ -267,6 +281,10 @@ func _on_emptyall_pressed():
 	for trash in trash_list:
 		temp_score += inventory.count(trash) * data.trash[trash].value
 		
+	for item in items_list:
+		if (item in inventory):
+			temp_score += data.items[item].value
+
 	inventory = []
 				
 	render_inventory()
@@ -292,11 +310,16 @@ func toggle_leaderboard():
 			touchscreen.show()
 
 func render_leaderboard():
-	score.text = ''
+	for child in leaderboard_slots.get_children():
+		if (child.name != 'label'):
+			child.queue_free()
+	
 	for peer_id in network.players:
 		var player = network.players[peer_id]
 		
-		score.text += player.name + ' : ' + str(player.score) + '\n'
+		var leaderboard = leaderboard_instance.instance()
+		leaderboard_slots.add_child(leaderboard)
+		leaderboard.init(player.name, player.color, player.items, player.score)
 
 # trash spawning
 
@@ -348,6 +371,9 @@ sync func update_items(id, _items):
 			
 			var player = get_tree().get_root().get_node(str(id))
 			
+			for effect in data.default:
+				player[effect] = data.default[effect]
+			
 			for i in items:
 				var item = data.recipes[i]
 				for effect in item.effects:
@@ -358,7 +384,7 @@ sync func update_items(id, _items):
 					player.attack_collision.shape.radius = item.radius
 					player.update()
 						
-			network.players[get_tree().get_network_unique_id()].items = items
+		network.players[id].items = _items
 	else:
 		items = _items
 		var player = get_node('player')

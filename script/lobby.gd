@@ -11,17 +11,37 @@ onready var create_server_button = get_node('m/v/button_container/create_server'
 onready var room_setting = get_node('m/v/room_setting')
 onready var player_name = get_node('m/v/name_container/name')
 onready var status = get_node('m/v/status')
-onready var server_list = get_node('m/v/server_list')
+onready var server_list_parent = get_node('m/v/server_list')
+onready var server_list = get_node('m/v/server_list/s/v')
 onready var cancel_button = get_node('cancel_container/cancel')
 onready var player_numbers = get_node('m/v/room_setting/h/player_number')
 onready var animation = get_node('animation')
 onready var transition = get_node('transition')
+onready var player = get_node('background/player')
+
+var direction = 1
+var motion = Vector2.ZERO
 
 var broadcaster_instance = load('res://broadcaster.tscn')
 var listener_instance = load('res://listener.tscn')
 
 var broadcast_or_listener_node = null
 
+func _physics_process(delta):
+	motion.x = 500 * direction
+	motion.y += 1500 * delta
+	
+	motion = player.move_and_slide(motion, Vector2.UP)
+	
+	# player.position.x += 7 * direction
+	player.get_node('sprite').flip_h = direction != 1
+	
+func _on_timer_timeout():
+	direction = direction * -1
+
+func _on_jumptimer_timeout():
+	motion.y -= 750
+	
 func _ready():
 	if (autoenter):
 		if (OS.get_name() == 'Server'):
@@ -68,7 +88,7 @@ func _on_create_pressed():
 
 func _on_search_server_pressed():
 	button_container.hide()
-	server_list.show()
+	server_list_parent.show()
 	cancel_button.show()
 	
 	broadcast_or_listener_node = listener_instance.instance()
@@ -87,12 +107,11 @@ func add_server_list(info):
 func _on_cancel_pressed():
 	button_container.show()
 	
-	server_list.hide()
+	server_list_parent.hide()
 	room_setting.hide()
 	
 	for child in server_list.get_children():
-		if (child.name != 'label'):
-			child.queue_free()
+		child.queue_free()
 
 	player_name.editable = true
 	cancel_button.hide()
@@ -122,3 +141,11 @@ func player_number_changed(number, max_players):
 	
 func disconnected():
 	status.text = 'Gagal menyambung'
+
+func _on_tutorial_pressed():
+	transition.show()
+	animation.play('screen_transition')
+	yield(animation, 'animation_finished')
+	
+	get_tree().change_scene('res://tutorial.tscn')
+	

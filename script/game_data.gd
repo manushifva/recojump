@@ -1,5 +1,17 @@
 extends Node
 
+var default = {
+	'speed': 500,
+	'gravity': 5000,
+	'jump': 1250,
+	'jump_max': 2,
+	'anti_stun_owned': false,
+	'max_inventory': 25,
+	'weapon': null,
+	'attack_radius': 1,
+	'cooldown_duration': 0
+}
+
 var trash = {
 	'Botol plastik': {
 		'value': 5
@@ -15,6 +27,36 @@ var trash = {
 	},
 	'Sepatu bekas': {
 		'value': 10
+	}
+}
+
+var items = {
+	'Anti-gravitasi': {
+		'value': 25
+	}, 
+	'Sepatu lompat tinggi': {
+		'value': 25
+	},
+	'Sepatu kilat': {
+		'value': 25
+	}, 
+	'Tatapan Medusa': {
+		'value': 35
+	},
+	'Tangan pencuri': {
+		'value': 35
+	},
+	'Tongkat meteor': {
+		'value': 35
+	},
+	'Perisai Aegis': {
+		'value': 45
+	},
+	'Sentuhan Midas': {
+		'value': 45
+	},
+	'Tas superbesar': {
+		'value': 45
 	}
 }
 
@@ -36,19 +78,19 @@ var recipes = {
 	},
 	'Tatapan Medusa': {
 		'materials': {'Botol kaca': 2, 'Botol plastik': 3, 'Gelas kertas': 3},
-		'effects': {'weapon': 'Tatapan Medusa'},
+		'effects': {'weapon': 'Tatapan Medusa', 'cooldown_duration': 5},
 		'type': 'combat',
 		'radius': 250
 	},
 	'Tangan pencuri': {
 		'materials': {'Botol plastik': 1},
-		'effects': {'weapon': 'Tangan pencuri'},
+		'effects': {'weapon': 'Tangan pencuri', 'cooldown_duration': 10},
 		'type': 'combat',
 		'radius': 250
 	},
 	'Tongkat meteor': {
 		'materials': {'Botol kaca': 1},
-		'effects': {'weapon': 'Tongkat meteor'},
+		'effects': {'weapon': 'Tongkat meteor', 'cooldown_duration': 8},
 		'type': 'combat',
 		'radius': 500
 	},

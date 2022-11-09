@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-var speed = 1250
+var speed = 1000
 var steer_force = 150
 var velocity = Vector2.ZERO
 var acceleration = Vector2.ZERO
