@@ -3,6 +3,8 @@ extends KinematicBody2D
 var bullet_instance = load('res://bullet.tscn')
 var player_shadow_instance = load('res://player_shadow.tscn')
 
+export var allow_movement = true
+
 onready var game = get_node('/root/game')
 onready var name_label = get_node('name')
 onready var sprite = get_node('sprite')
@@ -15,6 +17,7 @@ onready var muzzle = get_node('muzzle')
 onready var attack_collision = get_node('area/collision')
 onready var sfx_player = get_node('sfx')
 onready var particle = get_node('particle')
+onready var medusa_effect = get_node('medusa_effect')
 
 var colors = {'red': Color(1, 0.37, 0.38), 'blue': Color(0.37, 0.69, 1), 'green': Color(0.47, 1, 0.3), 'yellow': Color(1, 0.95, 0.19)}
 
@@ -58,6 +61,10 @@ var jump_count = 0
 func _ready():
 	base_scale = sprite.scale
 	
+	if (!allow_movement):
+		name = 'dummy'
+		name_label.text = 'Boneka'
+	
 func play_sfx(sfx):
 	sfx_player.stream = load('res://audio/sfx/' + sfx + '.mp3')
 	sfx_player.play()
@@ -87,7 +94,7 @@ remote func update_state(pos, mot, is_right, act, wea, _stun, rad):
 func _physics_process(delta):
 	if (!is_slave):
 		var x_input = 0
-		if (!stunned):
+		if (!stunned and allow_movement):
 			x_input = Input.get_action_strength('ui_right') - Input.get_action_strength('ui_left')
 		
 		if (x_input != 0):
@@ -99,7 +106,7 @@ func _physics_process(delta):
 		if (is_on_floor() and jump_count != 0):
 			jump_count = 0
 		
-		if (!stunned):
+		if (!stunned and allow_movement):
 			if (Input.is_action_just_pressed('ui_up') and jump_count < jump_max):
 				motion.y = -jump
 				jump_count += 1
@@ -119,6 +126,10 @@ func _physics_process(delta):
 				if (target and allow_attack and weapon):
 					cooldown_timer.start()
 					current_cooldown = cooldown_duration
+					
+					if ('Sepatu kilat' in game.items):
+						current_cooldown -= 4
+						
 					game.attack_button.modulate = Color(0.45, 0.45, 0.45, 0.70)
 					game.cooldown_label.show()
 					game.cooldown_label.text = str(current_cooldown)
@@ -131,6 +142,8 @@ func _physics_process(delta):
 					elif (weapon == 'Tatapan Medusa'):
 						target.rpc('stun', 3, 'petrify')
 						camera.shake(0.2, 5)
+						
+						rpc('show_effect', 'medusa', [global_position, target.global_position], 1)
 					elif (weapon == 'Tongkat meteor'):
 						var locked = target
 						for x in range(3):
@@ -140,12 +153,13 @@ func _physics_process(delta):
 								rpc('spawn_bullet', int(locked.name))
 								camera.shake(0.2, 5)
 							else:
-								spawn_bullet(self)
+								spawn_bullet(locked.name)
+								camera.shake(0.2, 5)
 		
-		if (Input.is_action_just_pressed('inventory')):
-			game.toggle_inventory()
-		elif (Input.is_action_just_pressed('leaderboard')):
-			game.toggle_leaderboard()
+			if (Input.is_action_just_pressed('inventory')):
+				game.toggle_inventory()
+			elif (Input.is_action_just_pressed('leaderboard')):
+				game.toggle_leaderboard()
 		
 		if (!game.testmode):
 			rpc('update_state', position, motion, sprite.flip_h, action, weapon, stunned, attack_radius)
@@ -223,6 +237,18 @@ func _physics_process(delta):
 		
 	update()
 		
+sync func show_effect(effect_name, points, duration):
+	if (effect_name == 'medusa'):
+		medusa_effect.show()
+		
+		var index = 1
+		for point in points:
+			medusa_effect.add_point(point, index)
+			index += 1
+		
+		yield(get_tree().create_timer(duration), 'timeout')
+		pass
+		
 sync func stun(duration, effect = null):
 	camera.shake(0.3, 7)
 	
@@ -277,7 +303,7 @@ sync func spawn_bullet(target):
 	if (!game.testmode):
 		bullet_target = get_tree().get_root().get_node(str(target))
 	else:
-		bullet_target = self
+		bullet_target = game.get_node(target)
 	
 	bullet.init(muzzle.global_position, self, bullet_target)
 	
@@ -317,8 +343,12 @@ func _draw():
 			draw_colored_polygon(points, modulate_color)
 
 func _on_area_body_entered(body):
-	if (body.name != str(get_tree().get_network_unique_id()) and !('bullet' in body.name) and body is KinematicBody2D and target == null):
-		target = body
+	if (!game.testmode):
+		if (body.name != str(get_tree().get_network_unique_id()) and !('bullet' in body.name) and body is KinematicBody2D and target == null):
+			target = body
+	else:
+		if (!('bullet' in body.name) and body is KinematicBody2D and body != self and target == null):
+			target = body
 
 func _on_area_body_exited(body):
 	if (body == target):

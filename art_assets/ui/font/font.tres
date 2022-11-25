@@ -3,7 +3,7 @@
 [ext_resource path="res://art_assets/ui/font/Royal Kingdom.ttf" type="DynamicFontData" id=1]
 
 [resource]
-size = 18
+size = 15
 use_filter = true
 extra_spacing_top = 4
 font_data = ExtResource( 1 )

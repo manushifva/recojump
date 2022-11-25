@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/sampah.png-f9fda9f0bdd5f8eb2d2fe46d34e582de.stex"
+path="res://.import/panel-ordered.png-16a49ad103950bbe7d6c230e66015d7d.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art_assets/tiles/sampah.png"
-dest_files=[ "res://.import/sampah.png-f9fda9f0bdd5f8eb2d2fe46d34e582de.stex" ]
+source_file="res://art_assets/ui/panel-ordered.png"
+dest_files=[ "res://.import/panel-ordered.png-16a49ad103950bbe7d6c230e66015d7d.stex" ]
 
 [params]
 

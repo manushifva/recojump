@@ -1,4 +1,4 @@
-[gd_scene load_steps=36 format=2]
+[gd_scene load_steps=37 format=2]
 
 [ext_resource path="res://art_assets/tiles/tilemap.tres" type="TileSet" id=1]
 [ext_resource path="res://art_assets/ui/font/Royal Kingdom.ttf" type="DynamicFontData" id=2]
@@ -9,7 +9,7 @@
 [ext_resource path="res://script/game.gd" type="Script" id=7]
 [ext_resource path="res://art_assets/ui/close.png" type="Texture" id=8]
 [ext_resource path="res://art_assets/ui/ui.tres" type="Theme" id=9]
-[ext_resource path="res://art_assets/tiles/castle.png" type="Texture" id=10]
+[ext_resource path="res://art_assets/tiles/decorations.png" type="Texture" id=10]
 [ext_resource path="res://art_assets/ui/joystick-up.png" type="Texture" id=11]
 [ext_resource path="res://art_assets/backgrounds/island.png" type="Texture" id=12]
 [ext_resource path="res://art_assets/ui/background.png" type="Texture" id=13]
@@ -26,6 +26,7 @@
 [ext_resource path="res://art_assets/ui/attack.png" type="Texture" id=24]
 [ext_resource path="res://audio/sfx/walk.mp3" type="AudioStream" id=25]
 [ext_resource path="res://script/tutorial.gd" type="Script" id=26]
+[ext_resource path="res://player.tscn" type="PackedScene" id=27]
 
 [sub_resource type="Animation" id=23]
 length = 0.001
@@ -104,11 +105,11 @@ font_data = ExtResource( 2 )
 [sub_resource type="CanvasItemMaterial" id=9]
 
 [sub_resource type="TileSet" id=8]
-0/name = "castle.png 0"
+0/name = "decorations.png 0"
 0/texture = ExtResource( 10 )
 0/tex_offset = Vector2( 0, 0 )
 0/modulate = Color( 1, 1, 1, 1 )
-0/region = Rect2( 280, 0, 70, 70 )
+0/region = Rect2( 980, 0, 70, 70 )
 0/tile_mode = 0
 0/occluder_offset = Vector2( 0, 0 )
 0/navigation_offset = Vector2( 0, 0 )
@@ -259,93 +260,11 @@ position = Vector2( 536, 12 )
 scale = Vector2( 0.375, 0.375 )
 frames = SubResource( 22 )
 animation = "walk"
-frame = 3
+frame = 1
 playing = true
 
 [node name="timer" type="Timer" parent="loading"]
 wait_time = 3.0
-
-[node name="tutorial" type="CanvasLayer" parent="."]
-script = ExtResource( 26 )
-
-[node name="guide" type="TextureRect" parent="tutorial"]
-margin_left = 34.0
-margin_top = 319.0
-margin_right = 166.0
-margin_bottom = 451.0
-texture = ExtResource( 19 )
-expand = true
-stretch_mode = 5
-
-[node name="label" type="Label" parent="tutorial"]
-margin_left = 32.0
-margin_top = 370.0
-margin_right = 1048.0
-margin_bottom = 392.0
-theme = ExtResource( 9 )
-custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
-text = "(Klik/tap untuk lanjutkan)"
-align = 2
-
-[node name="v" type="VBoxContainer" parent="tutorial"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-theme = ExtResource( 9 )
-
-[node name="separator" type="Control" parent="tutorial/v"]
-margin_right = 1080.0
-margin_bottom = 341.0
-size_flags_vertical = 3
-
-[node name="bg" type="MarginContainer" parent="tutorial/v"]
-margin_top = 345.0
-margin_right = 1080.0
-margin_bottom = 520.0
-size_flags_vertical = 0
-custom_constants/margin_right = 32
-custom_constants/margin_top = 64
-custom_constants/margin_left = 32
-custom_constants/margin_bottom = 32
-
-[node name="rect" type="NinePatchRect" parent="tutorial/v/bg"]
-margin_left = 32.0
-margin_top = 64.0
-margin_right = 1048.0
-margin_bottom = 143.0
-size_flags_vertical = 3
-texture = ExtResource( 16 )
-patch_margin_left = 31
-patch_margin_top = 34
-patch_margin_right = 33
-patch_margin_bottom = 35
-
-[node name="m" type="MarginContainer" parent="tutorial/v/bg"]
-margin_left = 32.0
-margin_top = 64.0
-margin_right = 1048.0
-margin_bottom = 143.0
-rect_min_size = Vector2( 0, 79 )
-size_flags_horizontal = 5
-size_flags_vertical = 4
-custom_constants/margin_right = 16
-custom_constants/margin_top = 16
-custom_constants/margin_left = 16
-custom_constants/margin_bottom = 16
-
-[node name="v" type="VBoxContainer" parent="tutorial/v/bg/m"]
-margin_left = 16.0
-margin_top = 16.0
-margin_right = 1000.0
-margin_bottom = 63.0
-
-[node name="tips" type="Label" parent="tutorial/v/bg/m/v"]
-margin_right = 984.0
-margin_bottom = 47.0
-size_flags_horizontal = 3
-size_flags_vertical = 7
-custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
-text = "Halo! Kamu pasti baru disini. Aku akan mengajarimu beberapa hal dasar! "
-autowrap = true
 
 [node name="ui" type="CanvasLayer" parent="."]
 layer = 10
@@ -358,6 +277,7 @@ texture = ExtResource( 13 )
 expand = true
 
 [node name="timer_background" type="TextureRect" parent="ui"]
+visible = false
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = -95.0
@@ -368,6 +288,7 @@ texture = ExtResource( 14 )
 expand = true
 
 [node name="timer" type="Label" parent="ui"]
+visible = false
 anchor_left = 0.5
 anchor_right = 0.5
 margin_left = -95.0
@@ -410,6 +331,7 @@ normal = ExtResource( 17 )
 action = "inventory"
 
 [node name="leaderboard" type="TouchScreenButton" parent="ui/touchscreen"]
+visible = false
 position = Vector2( 804, 126 )
 scale = Vector2( 0.344538, 0.344538 )
 normal = ExtResource( 18 )
@@ -489,6 +411,21 @@ margin_right = 239.0
 margin_bottom = 43.0
 size_flags_horizontal = 4
 text = "0/25"
+
+[node name="back" type="MarginContainer" parent="ui"]
+anchor_right = 1.0
+margin_bottom = 65.0
+size_flags_vertical = 0
+theme = ExtResource( 9 )
+
+[node name="Button" type="Button" parent="ui/back"]
+margin_left = 452.0
+margin_top = 11.0
+margin_right = 627.486
+margin_bottom = 53.6484
+size_flags_horizontal = 4
+size_flags_vertical = 4
+text = "Kembali ke lobby"
 
 [node name="inventory_ui" type="CanvasLayer" parent="."]
 visible = false
@@ -629,6 +566,94 @@ size_flags_vertical = 3
 position = Vector2( 999, 0 )
 normal = ExtResource( 8 )
 action = "inventory"
+
+[node name="tutorial" type="CanvasLayer" parent="."]
+visible = false
+script = ExtResource( 26 )
+
+[node name="overlay" type="ColorRect" parent="tutorial"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 1, 0.686275, 0.686275, 0.329412 )
+
+[node name="guide" type="TextureRect" parent="tutorial"]
+margin_left = 34.0
+margin_top = 319.0
+margin_right = 166.0
+margin_bottom = 451.0
+texture = ExtResource( 19 )
+expand = true
+stretch_mode = 5
+
+[node name="label" type="Label" parent="tutorial"]
+margin_left = 32.0
+margin_top = 370.0
+margin_right = 1048.0
+margin_bottom = 392.0
+theme = ExtResource( 9 )
+custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
+text = "(Klik/tap untuk lanjutkan)"
+align = 2
+
+[node name="v" type="VBoxContainer" parent="tutorial"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme = ExtResource( 9 )
+
+[node name="separator" type="Control" parent="tutorial/v"]
+margin_right = 1080.0
+margin_bottom = 341.0
+size_flags_vertical = 3
+
+[node name="bg" type="MarginContainer" parent="tutorial/v"]
+margin_top = 345.0
+margin_right = 1080.0
+margin_bottom = 520.0
+size_flags_vertical = 0
+custom_constants/margin_right = 32
+custom_constants/margin_top = 64
+custom_constants/margin_left = 32
+custom_constants/margin_bottom = 32
+
+[node name="rect" type="NinePatchRect" parent="tutorial/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 143.0
+size_flags_vertical = 3
+texture = ExtResource( 16 )
+patch_margin_left = 31
+patch_margin_top = 34
+patch_margin_right = 33
+patch_margin_bottom = 35
+
+[node name="m" type="MarginContainer" parent="tutorial/v/bg"]
+margin_left = 32.0
+margin_top = 64.0
+margin_right = 1048.0
+margin_bottom = 143.0
+rect_min_size = Vector2( 0, 79 )
+size_flags_horizontal = 5
+size_flags_vertical = 4
+custom_constants/margin_right = 16
+custom_constants/margin_top = 16
+custom_constants/margin_left = 16
+custom_constants/margin_bottom = 16
+
+[node name="v" type="VBoxContainer" parent="tutorial/v/bg/m"]
+margin_left = 16.0
+margin_top = 16.0
+margin_right = 1000.0
+margin_bottom = 63.0
+
+[node name="tips" type="Label" parent="tutorial/v/bg/m/v"]
+margin_right = 984.0
+margin_bottom = 47.0
+size_flags_horizontal = 3
+size_flags_vertical = 7
+custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
+text = "Halo! Kamu pasti baru disini. Aku akan mengajarimu beberapa hal dasar! "
+autowrap = true
 
 [node name="leaderboard_ui" type="CanvasLayer" parent="."]
 visible = false
@@ -793,7 +818,7 @@ texture = ExtResource( 12 )
 layer = -5
 
 [node name="sprite" type="Sprite" parent="background"]
-position = Vector2( 2, -208 )
+position = Vector2( 0, -209 )
 z_index = -2
 z_as_relative = false
 texture = ExtResource( 4 )
@@ -803,7 +828,7 @@ centered = false
 tile_set = ExtResource( 1 )
 cell_size = Vector2( 70, 70 )
 format = 1
-tile_data = PoolIntArray( -1114137, 50, 0, -1114136, 50, 0, -1114135, 50, 0, -1114134, 50, 0, -1114133, 50, 0, -1114132, 50, 0, -1114131, 50, 0, -1114130, 50, 0, -1114129, 50, 0, -1114128, 50, 0, -1114127, 50, 0, -1114126, 50, 0, -1114125, 50, 0, -1114124, 50, 0, -1114123, 50, 0, -1114122, 50, 0, -1114121, 50, 0, -1114120, 50, 0, -1114119, 50, 0, -1114118, 50, 0, -1114117, 50, 0, -1114116, 50, 0, -1114115, 50, 0, -1114114, 50, 0, -1114113, 50, 0, -1179648, 50, 0, -1179647, 50, 0, -1179646, 50, 0, -1179645, 50, 0, -1179644, 50, 0, -1179643, 50, 0, -1179642, 50, 0, -1179641, 50, 0, -1179640, 50, 0, -1179639, 50, 0, -1179638, 50, 0, -1179637, 50, 0, -1179636, 50, 0, -1179635, 50, 0, -1179634, 50, 0, -1179633, 50, 0, -1179632, 50, 0, -1179631, 50, 0, -1179630, 50, 0, -1179629, 50, 0, -1179628, 50, 0, -1179627, 50, 0, -1179626, 50, 0, -1179625, 50, 0, -1179624, 50, 0, -1179623, 50, 0, -1048601, 50, 0, -1114087, 50, 0, -983065, 50, 0, -1048551, 50, 0, -917529, 50, 0, -983015, 50, 0, -851993, 50, 0, -917479, 50, 0, -786457, 50, 0, -851943, 50, 0, -720921, 50, 0, -786407, 50, 0, -655385, 50, 0, -720871, 50, 0, -589849, 50, 0, -655335, 50, 0, -524313, 50, 0, -589799, 50, 0, -458777, 50, 0, -524263, 50, 0, -393241, 50, 0, -458727, 50, 0, -327705, 50, 0, -393191, 50, 0, -262169, 50, 0, -327655, 50, 0, -196633, 50, 0, -262119, 50, 0, -131097, 50, 0, -196583, 50, 0, -65561, 50, 0, -131047, 50, 0, -25, 50, 0, -65533, 23, 0, -65532, 23, 0, -65531, 23, 0, -65530, 23, 0, -65511, 50, 0, 65511, 50, 0, 3, 51, 0, 4, 50, 0, 5, 50, 0, 6, 49, 0, 25, 50, 0, 131047, 50, 0, 65540, 51, 0, 65541, 48, 0, 65546, 23, 0, 65561, 50, 0, 196583, 50, 0, 131097, 50, 0, 262119, 50, 0, 196626, 32, 0, 196627, 32, 0, 196628, 32, 0, 196629, 32, 0, 196633, 50, 0, 327655, 50, 0, 262162, 50, 0, 262163, 50, 0, 262164, 50, 0, 262165, 50, 0, 262169, 50, 0, 393191, 50, 0, 327698, 50, 0, 327699, 50, 0, 327700, 50, 0, 327701, 50, 0, 327705, 50, 0, 458727, 50, 0, 458733, 20, 0, 458738, 43, 0, 458739, 44, 0, 458740, 43, 0, 458747, 37, 0, 458749, 44, 0, 393219, 44, 0, 393221, 38, 0, 393222, 43, 0, 393223, 42, 0, 393224, 44, 0, 393226, 36, 0, 393234, 50, 0, 393235, 50, 0, 393236, 50, 0, 393237, 50, 0, 393240, 40, 0, 393241, 50, 0, 524263, 50, 0, 524264, 23, 0, 524265, 23, 0, 524266, 23, 0, 524267, 23, 0, 524268, 23, 0, 524269, 23, 0, 524270, 23, 0, 524271, 23, 0, 524272, 23, 0, 524273, 23, 0, 524274, 23, 0, 524275, 23, 0, 524276, 23, 0, 524277, 23, 0, 524278, 23, 0, 524279, 23, 0, 524280, 23, 0, 524281, 23, 0, 524282, 32, 0, 524283, 23, 0, 524284, 23, 0, 524285, 23, 0, 524286, 23, 0, 524287, 23, 0, 458752, 23, 0, 458753, 23, 0, 458754, 23, 0, 458755, 23, 0, 458756, 23, 0, 458757, 23, 0, 458758, 23, 0, 458759, 23, 0, 458760, 23, 0, 458761, 23, 0, 458762, 23, 0, 458763, 23, 0, 458764, 32, 0, 458765, 32, 0, 458766, 32, 0, 458767, 32, 0, 458768, 32, 0, 458769, 32, 0, 458770, 50, 0, 458771, 50, 0, 458772, 50, 0, 458773, 50, 0, 458774, 23, 0, 458775, 23, 0, 458776, 23, 0, 458777, 23, 0, 589799, 50, 0, 589800, 50, 0, 589801, 50, 0, 589802, 50, 0, 589803, 50, 0, 589804, 50, 0, 589805, 27, 0, 589806, 50, 0, 589807, 50, 0, 589808, 50, 0, 589809, 50, 0, 589810, 50, 0, 589811, 50, 0, 589812, 50, 0, 589813, 50, 0, 589814, 50, 0, 589815, 50, 0, 589816, 50, 0, 589817, 50, 0, 589818, 50, 0, 589819, 50, 0, 589820, 50, 0, 589821, 50, 0, 589822, 50, 0, 589823, 50, 0, 524288, 27, 0, 524289, 50, 0, 524290, 50, 0, 524291, 50, 0, 524292, 50, 0, 524293, 50, 0, 524294, 50, 0, 524295, 50, 0, 524296, 50, 0, 524297, 50, 0, 524298, 50, 0, 524299, 50, 0, 524300, 50, 0, 524301, 50, 0, 524302, 50, 0, 524303, 50, 0, 524304, 50, 0, 524305, 50, 0, 524306, 50, 0, 524307, 50, 0, 524308, 50, 0, 524309, 50, 0, 524310, 50, 0, 524311, 50, 0, 524312, 50, 0, 524313, 50, 0, 655335, 50, 0, 655336, 50, 0, 655337, 50, 0, 655338, 50, 0, 655339, 50, 0, 655340, 50, 0, 655341, 50, 0, 655342, 50, 0, 655343, 50, 0, 655344, 50, 0, 655345, 30, 0, 655346, 50, 0, 655347, 50, 0, 655348, 50, 0, 655349, 50, 0, 655350, 50, 0, 655351, 50, 0, 655352, 30, 0, 655353, 50, 0, 655354, 50, 0, 655355, 50, 0, 655356, 50, 0, 655357, 50, 0, 655358, 50, 0, 655359, 50, 0, 589824, 50, 0, 589825, 50, 0, 589826, 50, 0, 589827, 50, 0, 589828, 50, 0, 589829, 50, 0, 589830, 50, 0, 589831, 50, 0, 589832, 50, 0, 589833, 50, 0, 589834, 50, 0, 589835, 50, 0, 589836, 50, 0, 589837, 50, 0, 589838, 50, 0, 589839, 50, 0, 589840, 30, 0, 589841, 50, 0, 589842, 50, 0, 589843, 50, 0, 589844, 50, 0, 589845, 50, 0, 589846, 50, 0, 589847, 31, 0, 589848, 50, 0, 589849, 50, 0, 720871, 50, 0, 720872, 50, 0, 720873, 50, 0, 720874, 50, 0, 720875, 50, 0, 720876, 50, 0, 720877, 50, 0, 720878, 50, 0, 720879, 50, 0, 720880, 50, 0, 720881, 50, 0, 720882, 50, 0, 720883, 50, 0, 720884, 31, 0, 720885, 50, 0, 720886, 50, 0, 720887, 50, 0, 720888, 50, 0, 720889, 50, 0, 720890, 50, 0, 720891, 50, 0, 720892, 50, 0, 720893, 50, 0, 720894, 50, 0, 720895, 50, 0, 655360, 50, 0, 655361, 50, 0, 655362, 50, 0, 655363, 50, 0, 655364, 50, 0, 655365, 50, 0, 655366, 50, 0, 655367, 27, 0, 655368, 50, 0, 655369, 50, 0, 655370, 50, 0, 655371, 50, 0, 655372, 50, 0, 655373, 50, 0, 655374, 50, 0, 655375, 50, 0, 655376, 50, 0, 655377, 50, 0, 655378, 50, 0, 655379, 50, 0, 655380, 50, 0, 655381, 50, 0, 655382, 50, 0, 655383, 50, 0, 655384, 50, 0, 655385, 50, 0, 786407, 50, 0, 786408, 30, 0, 786409, 50, 0, 786410, 50, 0, 786411, 50, 0, 786412, 50, 0, 786413, 50, 0, 786414, 50, 0, 786415, 50, 0, 786416, 50, 0, 786417, 50, 0, 786418, 50, 0, 786419, 50, 0, 786420, 50, 0, 786421, 50, 0, 786422, 50, 0, 786423, 50, 0, 786424, 50, 0, 786425, 50, 0, 786426, 50, 0, 786427, 50, 0, 786428, 50, 0, 786429, 50, 0, 786430, 50, 0, 786431, 50, 0, 720896, 50, 0, 720897, 50, 0, 720898, 50, 0, 720899, 50, 0, 720900, 50, 0, 720901, 50, 0, 720902, 50, 0, 720903, 50, 0, 720904, 50, 0, 720905, 50, 0, 720906, 50, 0, 720907, 50, 0, 720908, 50, 0, 720909, 50, 0, 720910, 50, 0, 720911, 50, 0, 720912, 50, 0, 720913, 50, 0, 720914, 50, 0, 720915, 50, 0, 720916, 50, 0, 720917, 50, 0, 720918, 50, 0, 720919, 50, 0, 720920, 50, 0, 720921, 50, 0 )
+tile_data = PoolIntArray( -1114137, 50, 0, -1114136, 50, 0, -1114135, 50, 0, -1114134, 50, 0, -1114133, 50, 0, -1114132, 50, 0, -1114131, 50, 0, -1114130, 50, 0, -1114129, 50, 0, -1114128, 50, 0, -1114127, 50, 0, -1114126, 50, 0, -1114125, 50, 0, -1114124, 50, 0, -1114123, 50, 0, -1114122, 50, 0, -1114121, 50, 0, -1114120, 50, 0, -1114119, 50, 0, -1114118, 50, 0, -1114117, 50, 0, -1114116, 50, 0, -1114115, 50, 0, -1114114, 50, 0, -1114113, 50, 0, -1179648, 50, 0, -1179647, 50, 0, -1179646, 50, 0, -1179645, 50, 0, -1179644, 50, 0, -1179643, 50, 0, -1179642, 50, 0, -1179641, 50, 0, -1179640, 50, 0, -1179639, 50, 0, -1179638, 50, 0, -1179637, 50, 0, -1179636, 50, 0, -1179635, 50, 0, -1179634, 50, 0, -1179633, 50, 0, -1179632, 50, 0, -1179631, 50, 0, -1179630, 50, 0, -1179629, 50, 0, -1179628, 50, 0, -1179627, 50, 0, -1179626, 50, 0, -1179625, 50, 0, -1179624, 50, 0, -1179623, 50, 0, -1048601, 50, 0, -1114087, 50, 0, -983065, 50, 0, -1048551, 50, 0, -917529, 50, 0, -983015, 50, 0, -851993, 50, 0, -917479, 50, 0, -786457, 50, 0, -851943, 50, 0, -720921, 50, 0, -786407, 50, 0, -655385, 50, 0, -720871, 50, 0, -589849, 50, 0, -655335, 50, 0, -524313, 50, 0, -589799, 50, 0, -458777, 50, 0, -524263, 50, 0, -393241, 50, 0, -458727, 50, 0, -327705, 50, 0, -393191, 50, 0, -262169, 50, 0, -327655, 50, 0, -196633, 50, 0, -262119, 50, 0, -131097, 50, 0, -196583, 50, 0, -65561, 50, 0, -131047, 50, 0, -25, 50, 0, -65533, 58, 0, -65532, 32, 0, -65531, 32, 0, -65530, 59, 0, -65511, 50, 0, 65511, 50, 0, 3, 60, 0, 4, 50, 0, 5, 50, 0, 6, 54, 0, 25, 50, 0, 131047, 50, 0, 65540, 61, 0, 65541, 48, 0, 65546, 23, 0, 65561, 50, 0, 196583, 50, 0, 131084, 33, 0, 131097, 50, 0, 262119, 50, 0, 196626, 58, 0, 196627, 32, 0, 196628, 32, 0, 196629, 59, 0, 196633, 50, 0, 327655, 50, 0, 262162, 50, 0, 262163, 50, 0, 262164, 50, 0, 262165, 50, 0, 262169, 50, 0, 393191, 50, 0, 327698, 50, 0, 327699, 30, 0, 327700, 50, 0, 327701, 50, 0, 327705, 50, 0, 458727, 50, 0, 458733, 20, 0, 458738, 43, 0, 458739, 44, 0, 458740, 43, 0, 458747, 37, 0, 458749, 44, 0, 393219, 44, 0, 393221, 38, 0, 393222, 43, 0, 393223, 42, 0, 393224, 44, 0, 393226, 36, 0, 393234, 50, 0, 393235, 50, 0, 393236, 50, 0, 393237, 50, 0, 393240, 40, 0, 393241, 50, 0, 524263, 50, 0, 524264, 32, 0, 524265, 32, 0, 524266, 32, 0, 524267, 32, 0, 524268, 32, 0, 524269, 32, 0, 524270, 32, 0, 524271, 32, 0, 524272, 32, 0, 524273, 32, 0, 524274, 32, 0, 524275, 32, 0, 524276, 32, 0, 524277, 32, 0, 524278, 32, 0, 524279, 32, 0, 524280, 32, 0, 524281, 32, 0, 524282, 32, 0, 524283, 32, 0, 524284, 32, 0, 524285, 32, 0, 524286, 32, 0, 524287, 32, 0, 458752, 32, 0, 458753, 32, 0, 458754, 32, 0, 458755, 32, 0, 458756, 32, 0, 458757, 32, 0, 458758, 32, 0, 458759, 32, 0, 458760, 32, 0, 458761, 32, 0, 458762, 32, 0, 458763, 32, 0, 458764, 32, 0, 458765, 32, 0, 458766, 32, 0, 458767, 32, 0, 458768, 32, 0, 458769, 32, 0, 458770, 50, 0, 458771, 50, 0, 458772, 28, 0, 458773, 50, 0, 458774, 32, 0, 458775, 32, 0, 458776, 32, 0, 458777, 50, 0, 589799, 50, 0, 589800, 50, 0, 589801, 50, 0, 589802, 50, 0, 589803, 50, 0, 589804, 50, 0, 589805, 27, 0, 589806, 50, 0, 589807, 50, 0, 589808, 50, 0, 589809, 50, 0, 589810, 50, 0, 589811, 50, 0, 589812, 50, 0, 589813, 50, 0, 589814, 50, 0, 589815, 50, 0, 589816, 50, 0, 589817, 50, 0, 589818, 50, 0, 589819, 50, 0, 589820, 50, 0, 589821, 50, 0, 589822, 50, 0, 589823, 50, 0, 524288, 27, 0, 524289, 50, 0, 524290, 50, 0, 524291, 50, 0, 524292, 50, 0, 524293, 50, 0, 524294, 50, 0, 524295, 50, 0, 524296, 50, 0, 524297, 50, 0, 524298, 50, 0, 524299, 50, 0, 524300, 50, 0, 524301, 50, 0, 524302, 50, 0, 524303, 50, 0, 524304, 50, 0, 524305, 50, 0, 524306, 50, 0, 524307, 50, 0, 524308, 50, 0, 524309, 50, 0, 524310, 50, 0, 524311, 50, 0, 524312, 50, 0, 524313, 50, 0, 655335, 50, 0, 655336, 50, 0, 655337, 50, 0, 655338, 50, 0, 655339, 50, 0, 655340, 50, 0, 655341, 50, 0, 655342, 50, 0, 655343, 50, 0, 655344, 50, 0, 655345, 30, 0, 655346, 50, 0, 655347, 50, 0, 655348, 50, 0, 655349, 50, 0, 655350, 50, 0, 655351, 50, 0, 655352, 30, 0, 655353, 50, 0, 655354, 50, 0, 655355, 50, 0, 655356, 50, 0, 655357, 50, 0, 655358, 50, 0, 655359, 50, 0, 589824, 50, 0, 589825, 50, 0, 589826, 50, 0, 589827, 50, 0, 589828, 50, 0, 589829, 50, 0, 589830, 50, 0, 589831, 50, 0, 589832, 50, 0, 589833, 50, 0, 589834, 50, 0, 589835, 50, 0, 589836, 50, 0, 589837, 50, 0, 589838, 50, 0, 589839, 50, 0, 589840, 30, 0, 589841, 50, 0, 589842, 50, 0, 589843, 50, 0, 589844, 50, 0, 589845, 50, 0, 589846, 50, 0, 589847, 31, 0, 589848, 50, 0, 589849, 50, 0, 720871, 50, 0, 720872, 50, 0, 720873, 50, 0, 720874, 50, 0, 720875, 50, 0, 720876, 50, 0, 720877, 50, 0, 720878, 50, 0, 720879, 50, 0, 720880, 50, 0, 720881, 50, 0, 720882, 50, 0, 720883, 50, 0, 720884, 31, 0, 720885, 50, 0, 720886, 50, 0, 720887, 50, 0, 720888, 50, 0, 720889, 50, 0, 720890, 50, 0, 720891, 50, 0, 720892, 50, 0, 720893, 50, 0, 720894, 50, 0, 720895, 50, 0, 655360, 50, 0, 655361, 50, 0, 655362, 50, 0, 655363, 50, 0, 655364, 50, 0, 655365, 50, 0, 655366, 50, 0, 655367, 27, 0, 655368, 50, 0, 655369, 50, 0, 655370, 50, 0, 655371, 50, 0, 655372, 50, 0, 655373, 50, 0, 655374, 50, 0, 655375, 50, 0, 655376, 50, 0, 655377, 50, 0, 655378, 50, 0, 655379, 50, 0, 655380, 50, 0, 655381, 50, 0, 655382, 50, 0, 655383, 50, 0, 655384, 50, 0, 655385, 50, 0, 786407, 50, 0, 786408, 30, 0, 786409, 50, 0, 786410, 50, 0, 786411, 50, 0, 786412, 50, 0, 786413, 50, 0, 786414, 50, 0, 786415, 50, 0, 786416, 50, 0, 786417, 50, 0, 786418, 50, 0, 786419, 50, 0, 786420, 50, 0, 786421, 50, 0, 786422, 50, 0, 786423, 50, 0, 786424, 50, 0, 786425, 50, 0, 786426, 50, 0, 786427, 50, 0, 786428, 50, 0, 786429, 50, 0, 786430, 50, 0, 786431, 50, 0, 720896, 50, 0, 720897, 50, 0, 720898, 50, 0, 720899, 50, 0, 720900, 50, 0, 720901, 50, 0, 720902, 50, 0, 720903, 50, 0, 720904, 50, 0, 720905, 50, 0, 720906, 50, 0, 720907, 50, 0, 720908, 50, 0, 720909, 50, 0, 720910, 50, 0, 720911, 50, 0, 720912, 50, 0, 720913, 50, 0, 720914, 50, 0, 720915, 50, 0, 720916, 50, 0, 720917, 50, 0, 720918, 50, 0, 720919, 50, 0, 720920, 50, 0, 720921, 50, 0 )
 __meta__ = {
 "_edit_lock_": true
 }
@@ -819,9 +844,14 @@ __meta__ = {
 "_edit_lock_": true
 }
 
+[node name="player" parent="." instance=ExtResource( 27 )]
+position = Vector2( 1398, 169 )
+allow_movement = false
+
 [connection signal="timeout" from="spawn_timer" to="." method="_on_spawn_timer_timeout"]
 [connection signal="timeout" from="level_timer" to="." method="_on_level_timer_timeout"]
 [connection signal="pressed" from="ui/disconnected/v/reconnect" to="." method="_on_reconnect_pressed"]
+[connection signal="pressed" from="ui/back/Button" to="tutorial" method="_on_Button_pressed"]
 [connection signal="pressed" from="inventory_ui/m/h/v/h/empty" to="." method="_on_empty_pressed"]
 [connection signal="pressed" from="inventory_ui/m/h/v/h/empty-all" to="." method="_on_emptyall_pressed"]
 [connection signal="pressed" from="game_end_ui/m/v/back_to_lobby" to="." method="_on_back_to_lobby_pressed"]

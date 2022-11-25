@@ -5,10 +5,10 @@ signal remove_server
 
 var clean_up_timer = Timer.new()
 var socket_udp = PacketPeerUDP.new()
-var listen_port = network.port_alt
+var listen_port = 8011
 var known_servers = {}
 
-export (int) var server_cleanup_threshold = 1
+export (int) var server_cleanup_threshold = 3
 
 func _init():
 	clean_up_timer.wait_time = server_cleanup_threshold
@@ -21,9 +21,9 @@ func _ready():
 	known_servers.clear()
 	
 	if socket_udp.listen(listen_port) != OK:
-		print("GameServer LAN service: Error listening on port: " + str(listen_port))
+		print('failed to listen')
 	else:
-		print("GameServer LAN service: Listening on port: " + str(listen_port))
+		print('successfully listen')
 
 func _process(delta):
 	if socket_udp.get_available_packet_count() > 0:
@@ -39,6 +39,7 @@ func _process(delta):
 				gameInfo.lastSeen = OS.get_unix_time()
 				known_servers[server_ip] = gameInfo
 				emit_signal("new_server", gameInfo)
+				print(socket_udp.get_packet_ip())
 			else:
 				var gameInfo = known_servers[server_ip]
 				gameInfo.lastSeen = OS.get_unix_time()

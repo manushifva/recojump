@@ -17,7 +17,7 @@ onready var cancel_button = get_node('cancel_container/cancel')
 onready var player_numbers = get_node('m/v/room_setting/h/player_number')
 onready var animation = get_node('animation')
 onready var transition = get_node('transition')
-onready var player = get_node('background/player')
+onready var player = get_node('/root/lobby/background/player')
 
 var direction = 1
 var motion = Vector2.ZERO
@@ -28,7 +28,7 @@ var listener_instance = load('res://listener.tscn')
 var broadcast_or_listener_node = null
 
 func _physics_process(delta):
-	motion.x = 500 * direction
+	motion.x = 350 * direction
 	motion.y += 1500 * delta
 	
 	motion = player.move_and_slide(motion, Vector2.UP)
@@ -36,19 +36,18 @@ func _physics_process(delta):
 	# player.position.x += 7 * direction
 	player.get_node('sprite').flip_h = direction != 1
 	
-func _on_timer_timeout():
-	direction = direction * -1
+func _on_area_body_entered(body):
+	if (body.name == 'collision' or body.name == 'collision2' or body.name == 'wall'):
+		direction = direction * -1
 
-func _on_jumptimer_timeout():
-	motion.y -= 750
+func _on_jump_body_entered(body):
+	if (body.name == 'jump_indicator'):
+		motion.y -= 750
 	
 func _ready():
-	if (autoenter):
-		if (OS.get_name() == 'Server'):
-			player_name.text = 'Server'
-			_on_create_pressed()
-		else:
-			connect_to_server('127.0.0.1')
+	if (OS.get_name() == 'Server'):
+		player_name.text = 'Server'
+		_on_create_pressed()
 	
 func disable_buttons():
 	search_server_button.disabled = true
@@ -93,6 +92,7 @@ func _on_search_server_pressed():
 	
 	broadcast_or_listener_node = listener_instance.instance()
 	add_child(broadcast_or_listener_node)
+	
 	broadcast_or_listener_node.connect('new_server', self, 'add_server_list')
 	broadcast_or_listener_node.connect('remove_server', self, 'remove_server_list')
 	
@@ -148,4 +148,3 @@ func _on_tutorial_pressed():
 	yield(animation, 'animation_finished')
 	
 	get_tree().change_scene('res://tutorial.tscn')
-	

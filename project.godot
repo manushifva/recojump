@@ -39,7 +39,7 @@ boot_splash/fullsize=false
 boot_splash/bg_color=Color( 1, 1, 1, 1 )
 config/icon="res://art_assets/branding/icon.png"
 config/server_export=false
-config/testmode=true
+config/testmode=false
 
 [autoload]
 

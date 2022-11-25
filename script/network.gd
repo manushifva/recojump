@@ -5,17 +5,18 @@ signal game_started
 signal disconnected
 
 var port = 8010
-var port_alt = 8011
+var port_alt = 8012
 
 var game_started = false
 var max_players = 0
 
 var players = {}
-var data = {'name': '', 'position': Vector2(0, 0), 'score': 0, 'items': [], 'color':  null}
+var default = {'name': '', 'position': Vector2(0, 0), 'score': 0, 'items': [], 'color':  null}
 var have_connected_before = false
 
 var ip_address = ''
 var colors = ['red', 'blue', 'green', 'yellow']
+var positions = [Vector2(-4592, 112), Vector2(4592, 112)]
 
 func _ready():
 	if OS.get_name() == "Windows":
@@ -28,11 +29,13 @@ func _ready():
 	for ip in IP.get_local_addresses():
 		if ip.begins_with("192.168.") and not ip.ends_with(".1"):
 			ip_address = ip
+			
+	get_tree().connect('network_peer_disconnected', self, 'on_player_disconnected')
 
 func create_server(player_name, player_numbers):
-	data.name = player_name
+	default.name = player_name
 	max_players = player_numbers
-	players[1] = data
+	players[1] = default
 	
 	var peer = NetworkedMultiplayerENet.new()
 	peer.compression_mode = NetworkedMultiplayerENet.COMPRESS_RANGE_CODER 
@@ -42,7 +45,7 @@ func create_server(player_name, player_numbers):
 func connect_to_server(player_name, ip):
 	# var ip = IP.get_local_addresses()[0]
 	
-	data.name = player_name
+	default.name = player_name
 	var peer = NetworkedMultiplayerENet.new()
 	peer.compression_mode = NetworkedMultiplayerENet.COMPRESS_RANGE_CODER 
 	peer.create_client(ip, port)
@@ -52,17 +55,21 @@ func connect_to_server(player_name, ip):
 	get_tree().connect('connection_failed', self, 'connected_fail')
 	get_tree().connect('server_disconnected', self, 'server_disconnected')
 	
+	ip_address = ip
+	
 func cancel_connection():
 	get_tree().disconnect('connected_to_server', self, 'player_connected')
 	get_tree().disconnect('connection_failed', self, 'connected_fail')
 	get_tree().disconnect('server_disconnected', self, 'server_disconnected')
 	
 	get_tree().network_peer = null
+	
+	ip_address = ''
 
 func player_connected():
 	have_connected_before = true
-	players[get_tree().get_network_unique_id()] = data
-	rpc_id(1, 'send_player_info', get_tree().get_network_unique_id(), data)
+	players[get_tree().get_network_unique_id()] = default
+	rpc_id(1, 'send_player_info', get_tree().get_network_unique_id(), default)
 
 func connected_fail():
 	emit_signal('disconnected')
@@ -76,6 +83,7 @@ remote func get_latest_player_info(info):
 	
 		for peer_id in info:
 			info[peer_id].color = colors[count]
+			info[peer_id].position = positions[count]
 			count += 1
 	
 		for peer_id in info:
@@ -99,7 +107,7 @@ sync func update_player_number(number, max_players):
 sync func load_game():
 	emit_signal('game_started')
 
-	game_started = true
+	game_started = true 
 
 	yield(get_tree().current_scene, "tree_exited")
 	yield(get_tree(), "idle_frame")
@@ -113,5 +121,15 @@ sync func load_game():
 			get_tree().get_root().add_child(new_player)
 			new_player.init(info.name, info.position, info.color, true)
 
-func spawn_players():
-	pass
+func reset_network():
+	game_started = false
+	max_players = 0
+
+	players = {}
+	have_connected_before = false
+	get_tree().network_peer.close_connection()
+	
+	get_tree().disconnect('network_peer_disconnected', self, 'on_player_disconnected')
+
+func on_player_disconnected(id):
+	players.erase(id)

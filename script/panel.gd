@@ -1,9 +1,15 @@
 extends TextureButton
 
+var default_texture = load('res://art_assets/ui/panel.png')
+var selected_texture = load('res://art_assets/ui/panel-selected.png')
+var ordered_texture = load('res://art_assets/ui/panel-ordered.png')
+
 onready var game = get_node('/root/game')
 onready var trash = get_node('trash')
 onready var item = get_node('item')
 onready var label = get_node('label')
+onready var texture = get_node('texture')
+onready var crown = get_node('crown')
 
 var clickable
 var item_name
@@ -17,7 +23,7 @@ func init(index, number, _type, _clickable = true):
 	if (type == 'trash'):
 		trash.show()
 		trash.frame = index
-	if (type == 'item'):
+	if (type == 'item' or type == 'craftable'):
 		label.hide()
 		item.show()
 		item.frame = index
@@ -40,6 +46,7 @@ func _on_panel_pressed():
 			game.inventory.erase(item)
 			game.render_inventory()
 			game.update_inventory_progress()
+			
 	if (type == 'item'):
 		if (game.click_to_sell):
 			var value = data.items[item_name].value
@@ -56,11 +63,11 @@ func _on_panel_pressed():
 			if (item_name in game.items):
 				var player
 				if (!game.testmode):
-					player = get_tree().get_root().get_node(str(get_tree().get_network_unique_id())).max_inventory
+					player = get_tree().get_root().get_node(str(get_tree().get_network_unique_id()))
 				else:
 					player = game.get_node('player')
 				
-				if (game.inventory.size() < player):
+				if (game.inventory.size() < player.max_inventory):
 					game.items.erase(item_name)
 					game.inventory.append(item_name)
 			else:
@@ -68,9 +75,16 @@ func _on_panel_pressed():
 					game.inventory.erase(item_name)
 					game.items.append(item_name)
 				
-			game.rpc('update_items', get_tree().get_network_unique_id(), game.items)
-			game.render_inventory()
-			game.update_inventory_progress()
+		game.rpc('update_items', get_tree().get_network_unique_id(), game.items)
+		game.render_inventory()
+		game.update_inventory_progress()
+
+	if (type == 'craftable'):
+		for child in get_parent().get_children():
+			child.texture.texture = default_texture
+			
+		texture.texture = selected_texture
+		game.render_recipe(item_name)
 
 func change_color():
 	pass

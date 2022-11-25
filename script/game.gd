@@ -13,6 +13,7 @@ onready var tips_label = get_node('loading/c/v/bg/m/v/tips')
 onready var tiles = get_node('tiles')
 onready var spawners = get_node('spawners')
 onready var sfx_player = get_node('sfx')
+onready var tutorial = get_node('tutorial')
 
 # timers
 
@@ -29,19 +30,27 @@ onready var disconnected_screen = get_node('ui/disconnected')
 onready var loading = get_node('loading')
 onready var transition = get_node('transition')
 onready var transition_color = get_node('transition/color')
-onready var animation = get_node('transition/animation')
+onready var animation = get_node('animation')
 onready var cooldown_label = get_node('ui/touchscreen/cooldown')
 onready var attack_button = get_node('ui/touchscreen/attack')
+onready var bad_connection = get_node('ui/bad_connection')
 
 # inventory ui
 
 onready var inventory_ui = get_node('inventory_ui')
 onready var inventory_slots = get_node('inventory_ui/m/h/v/inventory')
 onready var item_slots = get_node('inventory_ui/m/h/v/item')
-onready var craftable_slots = get_node('inventory_ui/m/h/v2/c/craftable')
-onready var inventory_progress = get_node('ui/container/progress')
-onready var inventory_progress_label = get_node('ui/container/label')
-onready var inventory_container = get_node('ui/container')
+onready var craftable_slots = get_node('inventory_ui/m/h/v2/craftable')
+onready var inventory_progress = get_node('ui/progress')
+onready var inventory_progress_label = get_node('ui/label')
+onready var inventory_container = get_node('ui')
+onready var empty_button = get_node('inventory_ui/m/h/v/h/empty')
+onready var recipe_container = get_node('inventory_ui/m/h/v2/c')
+onready var recipe_name = get_node('inventory_ui/m/h/v2/c/vbox/name')
+onready var recipe_description = get_node('inventory_ui/m/h/v2/c/vbox/description')
+onready var recipe_material = get_node('inventory_ui/m/h/v2/c/vbox/material')
+onready var recipe_button = get_node('inventory_ui/m/h/v2/c/vbox/hbox/create')
+onready var order_button = get_node('inventory_ui/m/h/v2/c/vbox/hbox/order')
 
 # leaderboard ui
 
@@ -57,11 +66,14 @@ onready var winner = get_node('game_end_ui/m/v/winner')
 var camera_limit_left
 var camera_limit_right
 
+var reconnect_attempts = 0
+var max_attempts = 5
+
 var cells = []
 var isle = {}
 var used = []
 
-var game_time = 150
+var game_time = 999
 
 var inventory = []
 var items = []
@@ -70,6 +82,9 @@ var trash_list = data.trash.keys()
 var items_list = data.items.keys()
 
 var click_to_sell = false
+
+var priority = null
+var current_craft_item = null
 
 # main game
 
@@ -108,12 +123,12 @@ func _ready():
 		new_player.init(info.name, info.position, info.color, false)
 	else:
 		network.max_players = 5
-		network.players[0] = network.data
+		network.players[0] = network.default
 		
 		var new_player = load('res://player.tscn').instance()
 		add_child(new_player)
 		
-		new_player.init('test_player', Vector2(-1576, 248), 'red', false)
+		new_player.init('', Vector2(-1576, 248), 'red', false)
 		
 		render_inventory()
 		update_inventory_progress()
@@ -146,10 +161,14 @@ func _ready():
 	# rendering craftables
 	
 	for recipe in data.recipes:
-		var craftable = craftable_instance.instance()
-		craftable_slots.add_child(craftable)
-	
-		craftable.init(recipe, data.recipes[recipe].materials)
+#		var craftable = craftable_instance.instance()
+#		craftable_slots.add_child(craftable)
+#
+#		craftable.init(recipe, data.recipes[recipe].materials)
+
+		var panel = panel_instance.instance()
+		craftable_slots.add_child(panel)
+		panel.init(data.recipes.keys().find(recipe), 0, 'craftable')
 		
 	loading_timer.start()
 	
@@ -167,11 +186,16 @@ func _ready():
 	transition.hide()
 	
 	ui.show()
+	animation.play('ui')
+	yield(animation, 'animation_finished')
 	if (OS.get_name() == 'Android' or OS.get_name() == 'iOS'):
 		touchscreen.show()
 	
 	if (!testmode):
 		level_timer.start()
+	else:
+		if (tutorial):
+			tutorial.init()
 
 func _on_level_timer_timeout():
 	game_time -= 1
@@ -205,6 +229,7 @@ sync func end_game():
 	
 	winner.text = 'Pemenangnya adalah ' + max_score.name + ' dengan ' + str(max_score.score) + ' poin!'
 	game_end_ui.show()
+	animation.play('game_end')
 	
 func back_to_lobby():
 	for player in network.players:
@@ -214,6 +239,7 @@ func back_to_lobby():
 	
 func _on_back_to_lobby_pressed():
 	back_to_lobby()
+	network.reset_network()
 	
 func play_sfx(sfx):
 	sfx_player.stream = load('res://')
@@ -223,15 +249,18 @@ func play_sfx(sfx):
 
 func toggle_inventory():
 	if (!inventory_ui.visible):
-		ui.hide()
 		inventory_ui.show()
+		animation.play('inventory')
 		touchscreen.hide()
-		inventory_container.hide()
 		render_inventory()
 	else:
-		ui.show()
+		recipe_container.hide()
+		animation.play_backwards('inventory')
+		yield(animation, 'animation_finished')
 		inventory_ui.hide()
-		inventory_container.show()
+		
+		for child in craftable_slots.get_children():
+			child.texture.texture = child.default_texture
 		
 		if (OS.get_name() == 'Android' or OS.get_name() == 'iOS'):
 			touchscreen.show()
@@ -273,8 +302,76 @@ func update_inventory_progress():
 	inventory_progress.value = inventory.size()
 	inventory_progress_label.text = str(inventory.size()) + '/' + str(player.max_inventory)
 	
+	toggle_recipe_button()
+	
+func render_recipe(item):
+	current_craft_item = item
+	recipe_container.show()
+	
+	var recipe = data.recipes[item]
+	recipe_name.text = item
+	recipe_description.text = recipe.description
+	
+	for child in recipe_material.get_children():
+		child.queue_free()
+		
+	for _material in recipe.materials:
+		var panel = panel_instance.instance()
+		recipe_material.add_child(panel)
+		
+		panel.init(data.trash.keys().find(_material), recipe.materials[_material], 'trash', false)
+		
+	toggle_recipe_button()
+		
+func toggle_recipe_button():
+	if (current_craft_item != null):
+		var have_all_materials = true
+		var item_materials = data.recipes[current_craft_item].materials
+			
+		for _material in item_materials:
+			if (!inventory.count(_material) >= item_materials[_material]):
+				have_all_materials = false
+
+		if (!(current_craft_item in inventory) and !(current_craft_item in items) and have_all_materials):
+			recipe_button.disabled = false
+		else:
+			recipe_button.disabled = true
+	
+func _on_create_pressed():
+#	if (!current_craft_item in items and !current_craft_item in inventory):
+#		var have_all_materials = true 
+#		var item_materials = data.recipes[current_craft_item].materials
+#
+#		for _material in item_materials:
+#			if (!inventory.count(_material) >= item_materials[_material]):
+#				have_all_materials = false
+#
+#		if (have_all_materials):
+
+	var item_materials = data.recipes[current_craft_item].materials
+	for _material in item_materials:
+		for x in item_materials[_material]:
+			inventory.erase(_material)
+	
+	if (items.size() < 2):
+		items.append(current_craft_item)
+		if (!testmode):
+			rpc('update_items', get_tree().get_network_unique_id(), items)
+		else:
+			update_items(1, items)
+	else:
+		inventory.append(current_craft_item)
+
+	render_inventory()
+	update_inventory_progress()
+	
 func _on_empty_pressed():
 	click_to_sell = !click_to_sell
+	
+	if (click_to_sell):
+		empty_button.text = 'Selesai'
+	else:
+		empty_button.text = 'Kosongkan'
 	
 func _on_emptyall_pressed():
 	var temp_score = 0
@@ -296,14 +393,15 @@ func _on_emptyall_pressed():
 		
 		rpc('update_score', get_tree().get_network_unique_id(), temp_score)
 
-func toggle_leaderboard():
+func toggle_leaderboard():	
 	if (!leaderboard_ui.visible):
-		ui.hide()
 		leaderboard_ui.show()
+		animation.play('leaderboard')
 		touchscreen.hide()
 		render_leaderboard()
 	else:
-		ui.show()
+		animation.play_backwards('leaderboard')
+		yield(animation, 'animation_finished')
 		leaderboard_ui.hide()
 		
 		if (OS.get_name() == 'Android' or OS.get_name() == 'iOS'):
@@ -355,7 +453,16 @@ sync func spawn_trash(pos, isle_id, trash_id):
 	
 sync func remove_trash(trash_name):
 	used.erase(int(trash_name.replace('trash', '')))
-	get_node(trash_name).queue_free()
+	
+	var trash = get_node(trash_name)
+	if (trash and !trash.already_taken):
+		trash.tween.interpolate_property(trash, 'scale', Vector2(1, 1), Vector2(0.3, 0.3), 0.3)
+		trash.tween.start()
+		trash.sprite.hide()
+			
+		yield(trash.tween, 'tween_completed')
+		
+		trash.queue_free()
 
 # scoring
 
@@ -401,7 +508,24 @@ sync func update_items(id, _items):
 # network error
 
 func disconnected():
-	disconnected_screen.show()
+	if (reconnect_attempts <= max_attempts):
+		ui.hide()
+		network.cancel_connection()
+		network.connect_to_server(network.default.name, network.ip_address)
+		get_tree().connect('connected_to_server', self, 'successfully_reconnected')
+	else:
+		disconnected_screen.show()
+
+func successfully_reconnected():
+	pass
 
 func _on_reconnect_pressed():
 	back_to_lobby()
+
+func _on_order_pressed():
+	for child in craftable_slots.get_children():
+		if (child.item_name == current_craft_item):
+			child.crown.show()
+			priority = current_craft_item
+		else:
+			child.crown.hide()

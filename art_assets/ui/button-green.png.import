@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/Untitled92_20221030104757.png-228efcf7e45f5646f08219d99308080b.stex"
+path="res://.import/button-green.png-697e1e6b066530f6539827430853cbfc.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art_assets/tiles/Untitled92_20221030104757.png"
-dest_files=[ "res://.import/Untitled92_20221030104757.png-228efcf7e45f5646f08219d99308080b.stex" ]
+source_file="res://art_assets/ui/button-green.png"
+dest_files=[ "res://.import/button-green.png-697e1e6b066530f6539827430853cbfc.stex" ]
 
 [params]
 

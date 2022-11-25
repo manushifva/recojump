@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/lobby.mp3-04fdc7b46ecd81a3d3ec97a47fc1c973.mp3str"
+
+[deps]
+
+source_file="res://audio/bgm/lobby.mp3"
+dest_files=[ "res://.import/lobby.mp3-04fdc7b46ecd81a3d3ec97a47fc1c973.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0
