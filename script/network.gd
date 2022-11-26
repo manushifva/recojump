@@ -35,7 +35,9 @@ func _ready():
 func create_server(player_name, player_numbers):
 	default.name = player_name
 	max_players = player_numbers
-	players[1] = default
+	
+	if (OS.get_name() != 'Server'):
+		players[1] = default
 	
 	var peer = NetworkedMultiplayerENet.new()
 	peer.compression_mode = NetworkedMultiplayerENet.COMPRESS_RANGE_CODER 

@@ -4,7 +4,7 @@ signal connect_to_server
 
 onready var server_name = get_node('h/server_name')
 
-var server_ip = null
+export var server_ip = ''
 
 func init(info):
 	server_ip = info.ip

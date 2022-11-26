@@ -181,7 +181,6 @@ position = Vector2( 544, 353 )
 scale = Vector2( 0.75, 0.75 )
 frames = SubResource( 34 )
 animation = "walk"
-frame = 3
 playing = true
 
 [node name="area" type="Area2D" parent="background/player"]
@@ -307,28 +306,28 @@ text = "Buat room"
 
 [node name="server_list" type="VBoxContainer" parent="ui/m/v"]
 visible = false
-margin_top = 139.0
+margin_top = 128.0
 margin_right = 632.0
-margin_bottom = 196.0
+margin_bottom = 199.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="label" type="Label" parent="ui/m/v/server_list"]
 margin_right = 632.0
-margin_bottom = 22.0
+margin_bottom = 19.0
 custom_colors/font_color = Color( 0.329412, 0.329412, 0.329412, 1 )
 text = "Daftar Room:"
 
 [node name="s" type="ScrollContainer" parent="ui/m/v/server_list"]
-margin_top = 26.0
+margin_top = 23.0
 margin_right = 632.0
-margin_bottom = 57.0
+margin_bottom = 71.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="v" type="VBoxContainer" parent="ui/m/v/server_list/s"]
 margin_right = 632.0
-margin_bottom = 31.0
+margin_bottom = 54.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
@@ -455,8 +454,6 @@ color = Color( 0, 0, 0, 1 )
 anims/RESET = SubResource( 2 )
 anims/screen_transition = SubResource( 1 )
 
-[connection signal="timeout" from="background/timer" to="ui" method="_on_timer_timeout"]
-[connection signal="timeout" from="background/jumptimer" to="ui" method="_on_jumptimer_timeout"]
 [connection signal="body_entered" from="background/player/area" to="ui" method="_on_area_body_entered"]
 [connection signal="body_entered" from="background/player/jump" to="ui" method="_on_jump_body_entered"]
 [connection signal="pressed" from="ui/cancel_container/cancel" to="ui" method="_on_cancel_pressed"]
