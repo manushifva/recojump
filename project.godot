@@ -33,7 +33,7 @@ _global_script_class_icons={
 [application]
 
 config/name="p5_2"
-run/main_scene="res://lobby.tscn"
+run/main_scene="res://scenes/game.tscn"
 boot_splash/image="res://art_assets/branding/reco-logo.png"
 boot_splash/fullsize=false
 boot_splash/bg_color=Color( 1, 1, 1, 1 )

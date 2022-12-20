@@ -1,7 +1,7 @@
 extends KinematicBody2D
 
-var bullet_instance = load('res://bullet.tscn')
-var player_shadow_instance = load('res://player_shadow.tscn')
+var bullet_instance = load('res://scenes/bullet.tscn')
+var player_shadow_instance = load('res://scenes/player_shadow.tscn')
 
 export var allow_movement = true
 
@@ -49,8 +49,11 @@ var knockdir = Vector2.ZERO
 var knock_power = 0
 var max_knock = 0
 var action = 'idle'
+var prev_action = null
 var is_right = false
+var prev_is_right = null
 var weapon = null
+var prev_attack_radius = 0
 var stunned = false
 var anti_stun_owned = false
 var base_scale
@@ -82,14 +85,23 @@ func init(player_name, player_pos, player_color, is_been_slave):
 		camera.limit_left = game.camera_limit_left
 		camera.limit_right = game.camera_limit_right
 	
-remote func update_state(pos, mot, is_right, act, wea, _stun, rad):
-	slave_pos = pos
-	slave_motion = mot
-	slave_is_right = is_right
-	slave_action = act
-	slave_weapon = wea
-	slave_stunned = _stun
-	slave_attack_radius = rad
+remote func update_state(params):
+	for param in params.keys():
+		var value = params[param]
+		if (param == 'pos'):
+			slave_pos = value
+		elif (param == 'mot'):
+			slave_motion = value
+		elif (param == 'is_right'):
+			slave_is_right = value
+		elif (param == 'act'):
+			slave_action = value
+		elif (param == 'wea'):
+			slave_weapon = value
+		elif (param == 'stun'):
+			slave_stunned = value
+		elif (param == 'rad'):
+			slave_attack_radius = value
 	
 func _physics_process(delta):
 	if (!is_slave):
@@ -99,9 +111,12 @@ func _physics_process(delta):
 		
 		if (x_input != 0):
 			sprite.flip_h = x_input < 0
+			
+			if (prev_is_right != (x_input < 0)):
+				prev_is_right = x_input < 0
+				rpc('update_state', {'is_right': x_input < 0})
 		
 		motion.x = x_input * speed
-		motion.y += gravity * delta
 		
 		if (is_on_floor() and jump_count != 0):
 			jump_count = 0
@@ -114,6 +129,8 @@ func _physics_process(delta):
 				var player_shadow = player_shadow_instance.instance()
 				game.add_child(player_shadow)
 				player_shadow.init(global_position, sprite.frame, sprite.flip_h, color)
+				
+				rpc_unreliable('update_state', {'pos': position, 'mot': motion})
 
 			if (Input.is_action_pressed('ui_right') or Input.is_action_pressed('ui_left')):
 				action = 'walk'
@@ -121,6 +138,9 @@ func _physics_process(delta):
 			else:
 				action = 'idle'
 				sfx_player.playing = false
+				
+			if (prev_action != action):
+				rpc('update_state', {'act': action})
 				
 			if (Input.is_action_just_pressed('attack')):
 				if (target and allow_attack and weapon):
@@ -161,8 +181,14 @@ func _physics_process(delta):
 			elif (Input.is_action_just_pressed('leaderboard')):
 				game.toggle_leaderboard()
 		
+		if (prev_attack_radius != attack_radius):
+			prev_attack_radius = attack_radius
+			rpc('update_state', {'rad': attack_radius})
+		
 		if (!game.testmode):
-			rpc('update_state', position, motion, sprite.flip_h, action, weapon, stunned, attack_radius)
+			if (motion != prev_motion):
+				prev_motion = motion
+				rpc_unreliable('update_state', {'pos': position, 'mot': motion})
 	else:
 		position = slave_pos
 		motion = slave_motion
@@ -171,6 +197,9 @@ func _physics_process(delta):
 		weapon = slave_weapon
 		stunned = slave_stunned
 		attack_radius = slave_attack_radius
+	
+	motion.y += gravity * delta
+	slave_motion = motion
 	
 	sprite.play(action)
 	

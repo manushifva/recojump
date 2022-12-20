@@ -1,6 +1,6 @@
 extends VBoxContainer
 
-var panel_instance = load('res://panel.tscn')
+var panel_instance = load('res://scenes/panel.tscn')
 
 onready var game = get_node('/root/game')
 onready var name_label = get_node('name')

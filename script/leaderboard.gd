@@ -1,6 +1,6 @@
 extends MarginContainer
 
-var panel_instance = load('res://panel.tscn')
+var panel_instance = load('res://scenes/panel.tscn')
 
 onready var name_label = get_node('h/v/name')
 onready var score_label = get_node('h/score')

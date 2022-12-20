@@ -17,6 +17,7 @@ var have_connected_before = false
 var ip_address = ''
 var colors = ['red', 'blue', 'green', 'yellow']
 var positions = [Vector2(-4592, 112), Vector2(4592, 112)]
+#  var positions = [Vector2(160, 112), Vector2(0, 112)]
 
 func _ready():
 	if OS.get_name() == "Windows":
@@ -46,6 +47,8 @@ func create_server(player_name, player_numbers):
 
 func connect_to_server(player_name, ip):
 	# var ip = IP.get_local_addresses()[0]
+	
+	print(ip)
 	
 	default.name = player_name
 	var peer = NetworkedMultiplayerENet.new()
@@ -117,7 +120,7 @@ sync func load_game():
 	for peer_id in players:
 		if (peer_id != get_tree().get_network_unique_id()):
 			var info = players[peer_id]
-			var new_player = load('res://player.tscn').instance()
+			var new_player = load('res://scenes/player.tscn').instance()
 			new_player.name = str(peer_id)
 			new_player.set_network_master(peer_id)
 			get_tree().get_root().add_child(new_player)

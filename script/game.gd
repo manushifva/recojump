@@ -1,9 +1,9 @@
 extends Node2D
 
-var trash_instance = load('res://trash.tscn')
-var panel_instance = load('res://panel.tscn')
-var craftable_instance = load('res://craftable.tscn')
-var leaderboard_instance = load('res://leaderboard.tscn')
+var trash_instance = load('res://scenes/trash.tscn')
+var panel_instance = load('res://scenes/panel.tscn')
+var craftable_instance = load('res://scenes/craftable.tscn')
+var leaderboard_instance = load('res://scenes/leaderboard.tscn')
 
 export var testmode = false
 
@@ -26,14 +26,17 @@ onready var level_timer = get_node('level_timer')
 
 onready var ui = get_node('ui')
 onready var touchscreen = get_node('ui/touchscreen')
-onready var disconnected_screen = get_node('ui/disconnected')
 onready var loading = get_node('loading')
 onready var transition = get_node('transition')
 onready var transition_color = get_node('transition/color')
 onready var animation = get_node('animation')
 onready var cooldown_label = get_node('ui/touchscreen/cooldown')
 onready var attack_button = get_node('ui/touchscreen/attack')
-onready var bad_connection = get_node('ui/bad_connection')
+
+# network 
+
+onready var disconnected_screen = get_node('network/disconnected')
+onready var bad_connection = get_node('network/bad_connection')
 
 # inventory ui
 
@@ -114,18 +117,19 @@ func _ready():
 	if (!testmode):
 		network.connect('disconnected', self, 'disconnected')
 		
-		var new_player = load('res://player.tscn').instance()
-		new_player.name = str(get_tree().get_network_unique_id())
-		new_player.set_network_master(get_tree().get_network_unique_id())
-		get_tree().get_root().add_child(new_player)
-		var info = network.players[get_tree().get_network_unique_id()]
+		if (OS.get_name() != 'Server'):
+			var new_player = load('res://scenes/player.tscn').instance()
+			new_player.name = str(get_tree().get_network_unique_id())
+			new_player.set_network_master(get_tree().get_network_unique_id())
+			get_tree().get_root().add_child(new_player)
+			var info = network.players[get_tree().get_network_unique_id()]
 
-		new_player.init(info.name, info.position, info.color, false)
+			new_player.init(info.name, info.position, info.color, false)
 	else:
 		network.max_players = 5
 		network.players[0] = network.default
 		
-		var new_player = load('res://player.tscn').instance()
+		var new_player = load('res://scenes/player.tscn').instance()
 		add_child(new_player)
 		
 		new_player.init('', Vector2(-1576, 248), 'red', false)
@@ -235,7 +239,7 @@ func back_to_lobby():
 	for player in network.players:
 		get_tree().get_root().get_node(str(player)).queue_free()
 		
-	get_tree().change_scene('res://lobby.tscn')
+	get_tree().change_scene('res://scenes/lobby.tscn')
 	
 func _on_back_to_lobby_pressed():
 	back_to_lobby()
@@ -510,14 +514,17 @@ sync func update_items(id, _items):
 func disconnected():
 	if (reconnect_attempts <= max_attempts):
 		ui.hide()
+		bad_connection.show()
 		network.cancel_connection()
 		network.connect_to_server(network.default.name, network.ip_address)
 		get_tree().connect('connected_to_server', self, 'successfully_reconnected')
+		print('reconnecting')
 	else:
 		disconnected_screen.show()
 
 func successfully_reconnected():
-	pass
+	ui.show()
+	bad_connection.hide()
 
 func _on_reconnect_pressed():
 	back_to_lobby()

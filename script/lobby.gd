@@ -2,8 +2,8 @@ extends CanvasLayer
 
 export var autoenter = false
 
-var player_instance = load('res://player.tscn')
-var server_button_instance = load('res://server_button.tscn')
+var player_instance = load('res://scenes/player.tscn')
+var server_button_instance = load('res://scenes/server_button.tscn')
 
 onready var button_container = get_node('m/v/button_container')
 onready var search_server_button = get_node('m/v/button_container/search_server')
@@ -18,12 +18,13 @@ onready var player_numbers = get_node('m/v/room_setting/h/player_number')
 onready var animation = get_node('animation')
 onready var transition = get_node('transition')
 onready var player = get_node('/root/lobby/background/player')
+onready var timeout = get_node('timeout')
 
 var direction = 1
 var motion = Vector2.ZERO
 
-var broadcaster_instance = load('res://broadcaster.tscn')
-var listener_instance = load('res://listener.tscn')
+var broadcaster_instance = load('res://scenes/broadcaster.tscn')
+var listener_instance = load('res://scenes/listener.tscn')
 
 var broadcast_or_listener_node = null
 
@@ -58,6 +59,8 @@ func connect_to_server(ip):
 		button_container.hide()
 		player_name.editable = false
 		cancel_button.show()
+		
+		timeout.stop()
 		
 		network.connect_to_server(player_name.text, ip)
 		network.connect('disconnected', self, 'disconnected')
@@ -107,6 +110,8 @@ func add_server_list(info):
 func _on_cancel_pressed():
 	button_container.show()
 	
+	timeout.stop()
+	
 	server_list_parent.hide()
 	room_setting.hide()
 	
@@ -131,7 +136,7 @@ func load_game():
 	animation.play('screen_transition')
 	yield(animation, 'animation_finished')
 	
-	get_tree().change_scene('res://game.tscn')
+	get_tree().change_scene('res://scenes/game.tscn')
 	
 func remove_server_list(ip):
 	server_list.get_node('server' + ip.replace('.', '')).queue_free()
@@ -147,4 +152,10 @@ func _on_tutorial_pressed():
 	animation.play('screen_transition')
 	yield(animation, 'animation_finished')
 	
-	get_tree().change_scene('res://tutorial.tscn')
+	get_tree().change_scene('res://scenes/tutorial.tscn')
+
+func _on_Button_pressed():
+	connect_to_server('103.31.38.88')
+
+func _on_timeout_timeout():
+	timeout.stop()
